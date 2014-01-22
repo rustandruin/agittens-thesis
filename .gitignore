@@ -1,4 +1,6 @@
 *~
+*.lof
+*.brf
 *.fdb_latexmk
 *.sublime*
 *.toc
