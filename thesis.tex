@@ -1,0 +1,130 @@
+\documentclass[singlespace,11pt,defended]{cit_thesis} %doublespace
+
+\usepackage{CaltechThesis}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{wrapfig,array,color}
+\usepackage{enumerate}
+\usepackage{framed}
+\usepackage[noend]{algpseudocode}
+\usepackage{pbox}
+\usepackage{qbordermatrix}
+\usepackage{etex}
+\usepackage{pdflscape}
+
+\include{macros}
+\numberwithin{equation}{section}
+%\includeonly{ch4}
+
+\title{Topics in Randomized Numerical Linear Algebra}
+
+\author{Alex Gittens}
+
+\degreeaward{Doctor of Philosophy}
+\university{California Institute of Technology}
+\address{Pasadena, California}
+\unilogo{cit_logo}
+\date{May 31, 2013}
+\copyyear{\the\year}
+
+\begin{document}
+\maketitle
+%\makecopyright
+%\makededication
+\begin{acknowledgements}
+I have been privileged to befriend and work
+with exceptional individuals.
+
+I owe a debt of thank to Drs.~Emmanuel Papadakis and Gordon Johnson of the University of Houston
+for helping me get started on my academic path.
+% My initial interest in post-calculus mathematics was nurtured in Dr.~Johnson's idiosyncratic
+% courses on real analysis and Hilbert spaces, and it was in Dr.~Papadakis' signal
+% processing course that I encountered the beautiful truth that `advanced' mathematics
+% can be quite practical. Working with him for the next three
+% years, I learned quite a bit about harmonic analysis$\ldots$ most of which I have
+% managed to forget. What has stuck with me---the knowledge of the benefits accrued
+% by thinking of engineering problems as mathematical problems---cemented my
+% decision to attend graduate school.
+I consider myself lucky to have had the guidance of my PhD advisor, Joel Tropp,
+and remain humbled by his intuitive grasp of the ideas and tools I have wrestled with 
+throughout my graduate career. In addition to Joel, I am grateful to the other collaborators I was privileged to
+work with: Christos Boutsidis, Michael Mahoney, and Richard Chen. It
+was a pleasure working with them.
+
+I benefited greatly from interactions with my fellow students; in
+particular, I thank Catherine Beni, Chia-Chieh Chu, Derek Leong, Jinghao Huang, and Yamuna Phal for
+being great office mates and friends. My dear friend and
+amateur herpetologist Yekaterina Pavlova I thank for being her very unique self.
+Stephen Becker, Michael McCoy, Peter
+Stobbe, Patrick Sanan, Zhiyi Li, George Chen, and Yaniv Plan may have provided answers to the odd 
+math question, but I appreciate them more for the hours of wide-ranging discussions on
+everything under the sun.
+
+Finally, I thank my family for their support: my mother Mura; my father Erskine; my sister Lauren; 
+and my grandfather Chesterfield, who was a formative influence on my young mind.
+\end{acknowledgements}
+
+\begin{abstract}
+
+%Modern scientific computing requires efficient algorithms for manipulating and extracting information from large matrices.
+%by employing techniques ranging from matrix sparsification to
+%column-sampling to randomized projections. 
+%Understanding when and if these algorithms are 
+%appropriate for use requires the identification of the properties of the matrix that are relevant
+%to the performance of the algorithms, as well as knowledge of the tradeoffs between the
+%randomness used, the communication costs and runtime of the algorithms, and the errors incurred by the algorithms. 
+% With these consideration in mind, this thesis investigates three classes of randomized matrix algorithms. 
+This thesis studies three classes of randomized numerical linear algebra algorithms, namely: (i) randomized matrix sparsification algorithms,
+(ii) low-rank approximation algorithms that use randomized unitary transformations, and (iii) low-rank approximation algorithms
+for positive-semidefinite (PSD) matrices. 
+
+Randomized matrix sparsification algorithms set randomly chosen entries of the input matrix to zero. When the approximant is substituted 
+for the original matrix in computations, its sparsity allows one to employ 
+faster sparsity-exploiting algorithms. This thesis contributes bounds on the approximation error of nonuniform
+randomized sparsification schemes, measured in the spectral norm and two NP-hard norms that are of interest in computational
+graph theory and subset selection applications.
+
+
+ Low-rank approximations based on randomized unitary transformations have several desirable properties: they have low communication costs, 
+ are amenable to parallel implementation, and exploit the existence of fast transform algorithms. This thesis investigates
+ the tradeoff between the accuracy and cost of generating such approximations. State-of-the-art spectral and Frobenius-norm error bounds are 
+ provided.
+ 
+ The last class of algorithms considered are SPSD ``sketching'' algorithms. Such sketches can be computed faster than
+ approximations based on projecting onto mixtures of the columns of the matrix. The performance of several such sketching schemes is 
+ empirically evaluated using a suite of canonical matrices drawn from machine learning and data analysis applications, and a 
+ framework is developed for establishing theoretical error bounds. 
+ 
+ In addition to studying these algorithms, this thesis
+extends the Matrix Laplace Transform framework to derive Chernoff and Bernstein inequalities that apply to \emph{all}
+the eigenvalues of certain classes of random matrices. These inequalities are used to investigate the behavior of the
+singular values of a matrix under random sampling, and to derive convergence rates for each individual eigenvalue of a sample
+covariance matrix.
+
+ 
+% Further, new tools are provided to facilitate the analysis of current and future randomized algorithms:
+% \begin{itemize}
+%   \item An extension of the Matrix Laplace Transform technique is introduced that allows one to obtain exponential tail bounds for 
+%    all eigenvalues of a wide class of random matrices, rather than simply the extremal eigenvalues.
+%   \item Sharper error bounds---that avoid the 
+%    disadvantages of current bounds based upon the Kahan--Davis Sin$\Theta$ theorem and similar perturbation results---are provided for approximate spectral algorithms.
+% \end{itemize}
+\end{abstract}
+
+\tableofcontents
+\listoffigures
+\listoftables
+\listoftodos
+
+\mainmatter
+\include{intro}
+\include{ch1}
+\include{ch2}
+\include{prelims}
+\include{ch3}
+\input{ch4}
+
+
+\bibliographystyle{amsalpha}
+\bibliography{thesisbib}
+\end{document}

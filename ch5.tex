@@ -1,0 +1,848 @@
+%!TEX root = thesis.tex
+
+\chapter{Approximate spectral algorithms}
+\label{ch5}
+
+\section{Introduction}
+
+Introduce and motivate gap as measure of distance between equidimensional
+subspaces
+\[
+\gap(\mat{A}, \mat{B}) = \snorm{\mat{P}_{\mat{A}} - \mat{P}_{\mat{B}}} =
+\snorm{(\mat{I} - \mat{P}_{\mat{A}})\mat{P}_{\mat{B}}} = \snorm{(\mat{I} -
+\mat{P}_{\mat{B}})\mat{P}_{\mat{A}}}
+\]
+and asymmetric angles to measure subspace containment,
+\[
+\sin(\Theta(\mat{A}, \mat{B})) =\snorm{(\mat{I} -
+\mat{P}_{\mat{A}})\mat{P}_{\mat{B}}}
+\]
+when $\rank(\mat{A}) \geq \rank(\mat{B}).$
+
+Consider two methods of approximating the range space of $\mat{A}_k$, one
+classical, and one in the spirit of recent randomized column-based low-rank
+approximation schemes:
+\begin{enumerate}
+\item Using the range space of $\big[\mat{P}_{(\mat{A}\mat{A}^\star)^p \mat{A}
+\mat{S}} (\mat{A}\mat{A}^\star)^p \mat{A}\big]_k$
+\item Using the range space of $(\mat{A} \mat{A}^\star)^p \mat{A} \mat{S}.$
+\end{enumerate}
+Here $p \geq 0$ is an integer. 
+
+The first method is inspired by the by-now standard randomized column
+approximation schemes whereby one projects $\mat{A}$ onto the range space of
+$\mat{A} \mat{S},$ where the columns of $\mat{S}$ are random vectors. The
+intuition behind this approximation scheme is that the range space of $\mat{A}
+\mat{S}$ is biased towards the span of the top left singular vectors of
+$\mat{A}$, so projecting $\mat{A}$ onto this space should give a good low-rank
+approximation. It has been shown that this intution holds in the sense of norm
+reconstruction: when $\mat{S}$ consists of $O(k \log k)$ random vectors chosen
+from certain ensembles, 
+\[
+\|\mat{A} - \mat{P}_{\mat{A}\mat{S}} \mat{A}\|_2 \leq (1 + \mathrm{C})
+\sigma_{k+1}(\mat{A})
+\]
+with high probability~\cite{}. That is, this method produces an approximation
+with rank slightly higher than $k$ that is almost as accurate in the spectral
+norm as the optimal rank-$k$ approximation. However, the extent to which the 
+
+The second method is the classical subspace iteration (or orthogonal iteration,
+or simultaneous iteration) technique which, when $\mat{S}$ is simply a vector,
+reduces to the power method~\cite{W07}. Here, a nonzero $p$ is essential to
+obtain good convergence. This method of approximating invariant spaces has been
+much studied (?), and it is known that the convergence rate depends
+asymptotically on the ratio $(\sigma_{k+1}(\mat{A})/\sigma_k(\mat{A}))^2.$ Maybe
+the novelty of our method lies in explicit bounds for the convergence in terms
+of interaction of randomness w/ singular spaces and nonasymptotic nature of the
+bounds? 
+
+Key question we address is how close is the $k$-dimensional top singular space
+of $\tilde{\mat{A}}$ to that of $\mat{A}.$ Given that we understand the norm
+error, this is the natural next question, especially since many applications of
+low rank approximations involve approximations of singular vectors and singular
+spaces rather than of the matrix itself. Our results follow from a bound on
+$\|\mat{P}_{\mat{A}} - \mat{P}_{\tilde{\mat{A}}}\|_2.$ We show several
+interesting corollaries follow from this bound: we are able to estimate the
+angles between the top $k$-dimensional range spaces of two matrices (i.e.,
+regularized cross correlation scores), to estimate leverage scores of arbitrary
+matrices to within additive error, and address the error of spectral clustering
+using low-rank approximations. The bound we use on the difference between the
+projections follows from a perturbation analysis due to Golub and Zha; we show
+that the resulting bound is optimal and in the process give an exact expression
+for the gap 
+between the singular spaces of $\mat{A}$ and $\tilde{\mat{A}}$ that is a
+consequence of a nontrivial generalization of a result due to Stewart.
+
+We can also use these results to find additive approximations to the leverage
+scores. Note that if $n$ is very large, may make sense to reduce using this
+method then reduce further using Boutsidis et al.'s method for tall-thin
+matrices. Our result answer's Mahoney's question about the role the spectral gap
+plays in the recovery of the leverage scores. Note that we can get a relative
+error approximation of the coherence using this additive error bound.
+
+We can get norm error bounds on the approximation of the top singular vector.
+What about the other singular vectors? Say something about spectral clustering
+approximations and Nystrom approximations.
+Should compare to results can get using Kahan-Davis type perturbation bounds.
+
+Bounds convergence of randomly started subspace iteration algo for finding
+invariant subspaces.
+
+\section{Notation and Background}
+When $\rank(\mat{A}) \geq k$, then $\mat{A}_k = \mat{U}_k \mat{\Sigma}_k
+\mat{V}_k\transp$ denotes the rank-$k$ truncated SVD of $\mat{A}.$ When
+$\rank(\mat{A}) < k,$ we take $\mat{A}_k = \mat{A}.$
+
+Important to note that throughout paper, $\lambdamin{\cdot}$ means the last
+eigenvalue (as opposed to smallest nonzero)!
+
+\section{Approximation of Dominant Singular Spaces}
+
+The crux of our first result is a classical perturbation result that bounds the
+difference between the projections onto the range spaces of two matrices in
+terms of the difference of the matrices. (find citations other than GZ94 to
+support this) %  for projections that is, to the best of our knowledge, due to
+Golub and Zha~\cite{GZ94}. Since this result is woven into the proof of
+Theorem~3.6 in~\cite{GZ94}, we supply a standalone proof for clarity.
+
+\begin{lemma}
+\label{ch5:lem:projection-perturbation}
+Let $\mat{A}$ and $\mat{B}$ have the same dimensions. Then
+\[
+\|\mat{P}_{\mat{A}} - \mat{P}_{\mat{B}}\|_2 \leq \|\mat{A} - \mat{B}\|_2 \cdot
+\min\left\{\|\mat{A}^\dagger\|_2, \|\mat{B}^\dagger\|_2 \right\}.
+\]
+\end{lemma}
+
+\begin{proof}
+Let $\mat{Q}_{\mat{A}}$ be a matrix with $\rank(\mat{A})$ orthogonal columns
+that spans the range of $\mat{A}$ and define $\mat{Q}_{\mat{A}^\perp}$ so that
+its columns constitute an orthonormal basis for the complement of the range
+space of $\mat{A}.$ Let $\mat{R}_{\mat{A}} = \mat{Q}_{\mat{A}}\transp \mat{A};$
+this matrix has full row-rank and satisfies the identity $\mat{A} =
+\mat{Q}_{\mat{A}} \mat{R}_{\mat{A}}.$ Define $\mat{Q}_{\mat{B}},
+\mat{Q}_{\mat{B}^\perp},$ and $\mat{R}_{\mat{B}}$ analogously. It follows that 
+\begin{align*}
+\mat{P}_{\mat{A}} & = \mat{Q}_{\mat{A}}\mat{Q}_{\mat{A}}\transp, \text{ and } \\
+\mat{P}_{\mat{B}^\perp} & =
+\mat{Q}_{\mat{B}^\perp}\mat{Q}_{\mat{B}^\perp}\transp.
+\end{align*}
+Consequently we have the identity
+\begin{equation}
+\label{ch5:eqn:gap-in-terms-of-onbs}
+\|\mat{P}_{\mat{A}} - \mat{P}_{\mat{B}}\|_2 = \|\mat{P}_{\mat{A}}
+\mat{P}_{\mat{B}^\perp}\|_2 =  \| \mat{Q}_{\mat{A}}\mat{Q}_{\mat{A}}\transp
+\mat{Q}_{\mat{B}^\perp} \mat{Q}_{\mat{B}^\perp}\transp\|_2 = 
+\|\mat{Q}_{\mat{B}^\perp}\transp \mat{Q}_{\mat{A}}\|_2.
+\end{equation}
+To bound the term $ \|\mat{Q}_{\mat{B}^\perp}\transp \mat{Q}_{\mat{A}}\|_2,$ we
+begin by premultiplying both sides of the identity
+\[
+\mat{A} - \mat{B} = \mat{Q}_{\mat{A}} \mat{R}_{\mat{A}} - \mat{Q}_{\mat{B}}
+\mat{R}_{\mat{B}}
+\]
+with $\mat{Q}_{\mat{B}^\perp}\transp.$ This yields
+\[
+\mat{Q}_{\mat{B}^\perp}\transp(\mat{A} - \mat{B}) =
+\mat{Q}_{\mat{B}^\perp}\transp \mat{Q}_{\mat{A}} \mat{R}_{\mat{A}}.
+\]
+Since $\mat{R}_{\mat{A}}$ has full row-rank, $\mat{R}_{\mat{A}}
+\mat{R}_{\mat{A}}^\dagger = \mat{I},$ and postmultiplication of both sides of
+this identity with $\mat{R}_{\mat{A}}^\dagger$ gives
+\[
+\mat{Q}_{\mat{B}^\perp}\transp(\mat{A} - \mat{B})\mat{R}_{\mat{A}}^\dagger =
+\mat{Q}_{\mat{B}^\perp}\transp \mat{Q}_{\mat{A}} .
+\]
+We conclude that
+\[
+\| \mat{Q}_{\mat{B}^\perp}\transp \mat{Q}_{\mat{A}}\|_2 \leq \|\mat{A} -
+\mat{B}\|_2 \|\mat{R}_{\mat{A}}^\dagger\|_2 = \|\mat{A} - \mat{B}\|_2
+\|\mat{A}^\dagger\|_2.
+\]
+Using this identity in~\eqref{ch5:eqn:gap-in-terms-of-onbs} gives one half of the
+stated result:
+\[
+\|\mat{P}_{\mat{A}} - \mat{P}_{\mat{B}}\|_2 \leq \|\mat{A} - \mat{B}\|_2
+\|\mat{A}^\dagger\|_2.
+\]
+The remainder of the result follows from noting that the roles of $\mat{A}$ and
+$\mat{B}$ are interchangeable in this inequality.
+\end{proof}
+
+\begin{lemma}
+Given $\mat{B}$ and $\mat{A}$, the ranges of $\mat{P}_{\mat{B}} \mat{A}$ and
+$\mat{P}_{\mat{B}} (\mat{A} \mat{A}^\star)^p \mat{A}$ are identical.
+\end{lemma}
+
+Our main observation quantifies the extent to which the range of $\mat{A}_k$ is
+approximated by the range of the optimal rank-$k$ approximation to
+$\mat{P}_{\tilde{\mat{A}}\mat{S}} \mat{A}.$
+\begin{thm}
+Given $\mat{A}$ with $n$ columns and $\mat{S}$ with $n$ rows, let
+$\tilde{\mat{A}} = (\mat{A}\mat{A}^\star)^p \mat{A}$ for some nonnegative
+integer $p.$ If $\mat{V}_1\transp \mat{S}$ has full row-rank, then
+\[
+\gap\big(\mat{A}_k, \big[ \mat{P}_{\tilde{\mat{A}}\mat{S}} \tilde{\mat{A}}
+\big]_k \big) \leq 
+\left(\frac{\sigma_{k+1}(\mat{A})}{\sigma_k(\mat{A})}\right)^{2p+1} \cdot
+\left(1 + \sqrt{2} + \sqrt{2} \cdot \|\mat{V}_{\rho - k}\transp \mat{S}
+(\mat{V}_k\transp \mat{S})^\dagger\|_2 \right)
+\]
+\end{thm}
+
+\begin{proof}
+From the definition of the gap, we have that 
+\begin{align*}
+\gap\big(\mat{A}_k, \big[ \mat{P}_{\tilde{\mat{A}}\mat{S}} \tilde{\mat{A}}
+\big]_k \big) & = \Big\| \mat{P}_{\mat{A}_k} - \mat{P}_{
+\big[\mat{P}_{\tilde{\mat{A}}\mat{S}} \tilde{\mat{A}} \big]_k} \Big\|_2 \\
+& = \Big\| \mat{P}_{(\mat{A}\mat{A}^\star)^p \mat{A}_k} - \mat{P}_{
+\big[\mat{P}_{\tilde{\mat{A}}\mat{S}} \tilde{\mat{A}} \big]_k} \Big\|_2 \\
+& = \| \mat{P}_{\mat{C}} - \mat{P}_{\tilde{\mat{C}}}\|_2,
+\end{align*}
+where we let $\mat{C} = (\mat{A} \mat{A}^\star)^p \mat{A}_k$ and
+$\tilde{\mat{C}} = \big[\mat{P}_{\tilde{\mat{A}}\mat{S}} \tilde{\mat{A}} \big]_k
+= \Pi^F_{\tilde{\mat{A}}\mat{S},k}(\tilde{\mat{A}}).$
+Lemma~\ref{ch5:lem:projection-perturbation} gives the bound
+\begin{equation}
+\label{ch5:eqn:golub-zha-perturbation-result} 
+\gap\big(\mat{A}_k, \big[ \mat{P}_{\tilde{\mat{A}}\mat{S}} \tilde{\mat{A}}
+\big]_k \big) \leq \|\mat{C} - \tilde{\mat{C}}\|_2 \|\mat{C}^\dagger\|_2.
+\end{equation}
+
+Lemma~\ref{chprelim:lem:structural-result2} implies that
+\begin{align*}
+ \TNormS{\mat{C} - \tilde{\mat{C}}} & = \TNormS{\tilde{\mat{A}}_k
+-\Pi^F_{\tilde{\mat{A}}\mat{S},k}(\tilde{\mat{A}})} \\
+& \leq \TNormS{\tilde{\matA} - \tilde{\matA}_k} +
+\TNormS{\matSig_2^{2p+1} \matV_2 \transp \matOmega \left( \matV_1 \transp \matOmega \right)^\pinv }
+\end{align*}
+Lemma 7 in~\cite{BDM11a} states that
+\[
+ \|\tilde{\mat{A}} - \Pi^F_{\tilde{\mat{A}}\mat{S},k}(\tilde{\mat{A}})\|_2 \leq
+\sqrt{2} \cdot  \|\tilde{\mat{A}} -
+\Pi^2_{\tilde{\mat{A}}\mat{S},k}(\tilde{\mat{A}})\|_2, 
+\]
+and Lemma 8 in~\cite{BDM11a} gives the bound
+\[
+ \|\tilde{\mat{A}} - \Pi^2_{\tilde{\mat{A}}\mat{S},k}(\tilde{\mat{A}})\|_2 \leq
+\|(\mat{A}\mat{A}^\star)^p\mat{A}_{\rho - k}\|_2 + \|(\mat{A} \mat{A}^\star)^p
+\mat{A}_{\rho - k} \mat{S} (\mat{V}_k\transp \mat{S})^\dagger\|_2.
+\]
+Combining these estimates gives
+\begin{align}
+\label{ch5:eqn:difference-expansion}
+\|\mat{C} - \tilde{\mat{C}}\|_2 & \leq \|(\mat{A}\mat{A}^\star)^p \mat{A}_{\rho
+-k} \|_2 +  \|\tilde{\mat{A}} -
+\Pi^F_{\tilde{\mat{A}}\mat{S},k}(\tilde{\mat{A}})\|_2 \\
+ & \leq \|(\mat{A}\mat{A}^\star)^p \mat{A}_{\rho -k} \|_2 +  \sqrt{2} \cdot
+\|\tilde{\mat{A}} - \Pi^2_{\tilde{\mat{A}}\mat{S},k}(\tilde{\mat{A}})\|_2 \notag
+\\
+& \leq \|(\mat{A}\mat{A}^\star)^p \mat{A}_{\rho -k} \|_2 +  \sqrt{2} \cdot
+\left(\|(\mat{A}\mat{A}^\star)^p\mat{A}_{\rho - k}\|_2 + \|(\mat{A}
+\mat{A}^\star)^p \mat{A}_{\rho - k} \mat{S} (\mat{V}_k\transp
+\mat{S})^\dagger\|_2 \right) \notag \\
+& \leq  \|(\mat{A}\mat{A}^\star)^p \mat{A}_{\rho -k} \|_2 \cdot \left(1 +
+\sqrt{2} + \sqrt{2} \cdot \|\mat{V}_{\rho -k}\transp \mat{S} (\mat{V}_k\transp
+\mat{S})^\dagger\|_2 \right) \notag.
+\end{align}
+The last inequality follows from the observation that 
+\begin{multline*}
+\|(\mat{A}\mat{A}^\star)^p\mat{A}_{\rho - k} \mat{S} (\mat{V}_k\transp
+\mat{S})^\dagger \|_2 = \|\mat{U}_{\rho - k} \mat{\Sigma}_{\rho - k}
+\mat{V}_{\rho -k}\transp \mat{S} (\mat{V}_k\transp \mat{S})^\dagger\|_2\\
+ \leq \| \mat{\Sigma}_{\rho - k} \|_2  \|\mat{V}_{\rho -k}\transp \mat{S}
+(\mat{V}_k\transp \mat{S})^\dagger\|_2 = \|(\mat{A}\mat{A}^\star)^p\mat{A}_{\rho
+- k} \|_2 \|\mat{V}_{\rho -k}\transp \mat{S} (\mat{V}_k\transp
+\mat{S})^\dagger\|_2.
+\end{multline*}
+In the same vein,
+\[
+\|(\mat{A} \mat{A}^\star)^p \mat{A}_{\rho - k}\|_2 =
+\sigma_{k+1}(\mat{A})^{2p+1}
+\]
+and
+\[
+\|\mat{C}^\dagger\|_2 = \sigma_k\left((\mat{A}\mat{A}^\star)^p
+\mat{A}_k\right)^{-1} = \sigma_k\left(\mat{U}_k \mat{\Sigma}_k^{2p+1}
+\mat{V}_k\transp\right)^{-1} = \sigma_k(\mat{A})^{-(2p+1)}.
+\]
+
+The stated result follows from these two equalities and
+inequalities~\eqref{ch5:eqn:golub-zha-perturbation-result}
+and~\ref{ch5:eqn:difference-expansion}.
+\end{proof}
+
+\begin{remark}
+Consider taking $p = 0$, then we see that this bound has a constant term
+corresponding to the spectral gap $\frac{\sigma_{k+1}}{\sigma_k};$ the power
+method (taking $p \geq 1$ is necessary to drive this term down to zero. On the
+other hand, the second term in this gap bound can be driven to zero by
+increasing the number of columns we use in our sampling matrix $\mat{S}.$
+\end{remark}
+
+\section{Convergence of subspace iteration}
+
+Our next result characterizes the gap \emph{exactly} when the sampling matrix
+$\mat{S}$ has $k$ columns.
+\begin{thm}
+Given $\mat{A} \in \R^{m \times n}$, let $\mat{S} \in \R^{n \times k}$ be such
+that $\rank(\mat{A}_k \mat{S}) = k.$ Let $p \geq 0$ be an integer and define
+\[
+\gamma_p = \snorm{\mat{\Sigma}_{\rho-k}^{2p+1} \mat{V}_{\rho - k}\transp \mat{S}
+(\mat{V}_k\transp \mat{S})^{-1} \mat{\Sigma}_k^{-(2p+1)}}.
+\]
+It holds that 
+\[
+\gap((\mat{A}\mat{A}\transp)^p\mat{A} \mat{S}, \mat{A}_k)^2 =
+\frac{\gamma_p^2}{1 + \gamma_p^2}.
+\]
+\label{ch5:thm:maingapbound}
+\end{thm}
+
+\begin{remark}
+Interestingly, the quantity $\gamma_p$ appears to also govern the quality of
+low-rank approximations of the type
+$\mat{P}_{(\mat{A}\mat{A}\transp)^p\mat{A}\mat{S}} \mat{A}$~\cite{HMT11,BDM11a}.
+In both cases, $\gamma_p$ has a compelling interpretation: note that
+\[
+\gamma_p \leq \left(\frac{\sigma_{k+1}}{\sigma_k}\right)^{2p+1}
+\snorm{\mat{V}_{\rho - k}\transp \mat{S}} \snorm{(\mat{V}_k\transp
+\mat{S})^{-1}}.
+\]
+The first term, a power of the ratio of the $(k+1)$th and $k$th singular values
+of $\mat{A}$, is the inverse of the spectral gap; the larger the spectral gap,
+the easier it should be to capture the dominant $k$ dimensional range-space of
+$\mat{A}$ in the range space of $\mat{A}\mat{S}.$ Increasing the power increases
+the beneficial effect of the spectral gap. The remaining terms reflect the
+importance of choosing an appropriate sampling matrix $\mat{S}$: one desires
+$\mat{A}\mat{S}$ to have a small component in the direction of the undesired 
+range space spanned by $\mat{U}_{\rho -k};$ this is ensured if $\mat{S}$ has a
+small component in the direction of the corresponding right singular space.
+Likewise, one desires $\mat{V}_k$ and $\mat{S}$ to be strongly correlated so
+that $\mat{A}\mat{S}$ has large components in the direction of the desired
+space, spanned by $\mat{U}_k.$
+\end{remark}
+
+To apply Theorem~\ref{ch5:thm:maingapbound} practically to estimate the dominant
+$k$-dimensional left singular space of $\mat{A},$ we must choose an $\mat{S} \in
+\R^{n \times k}$ that satisfies $\rank(\mat{A}_k\mat{S}) = k$ and bound the
+resulting $\gamma_p.$ The next corollary gives a bound on $\gamma_p$ when
+$\mat{S}$ is chosen to be a matrix of i.i.d. standard gaussian r.v.s.
+
+\begin{cor}
+Fix $\mat{A} \in \R^{m \times n}$ with rank at least $k.$ Let $p \geq 0$ be an
+integer and draw $\mat{S} \in \R^{n \times k},$ a matrix of i.i.d. standard
+Gaussian r.v.s. Fix $\delta \in (0,1)$ and define
+\[
+\gamma = 2.35 \cdot
+\left(\frac{\sigma_{k+1}(\mat{A})}{\sigma_k(\mat{A})}\right)^{2p+1} \cdot
+\delta^{-1} (\sqrt{kn} + 2k).
+\]
+Then with probability at least $1 - (2e^{-k/2} + \delta),$
+\[
+\gap((\mat{A}\mat{A}\transp)^p \mat{A}\mat{S}, \mat{A}_k)^2 \leq
+\frac{\gamma^2}{1 + \gamma^2}.
+\]
+\end{cor}
+
+\begin{proof}
+Clearly $\mat{A}_k \mat{S}$ has rank $k$ (the rank of the product of a gaussian
+matrix and an arbitrary matrix is the minimum of the ranks of the two matrices),
+so Theorem~\ref{ch5:thm:maingapbound} is applicable. Estimate $\gamma_p$ as 
+\[
+\gamma_p \leq \snorm{\mat{\Sigma}_{\rho-k}}^{2p+1}
+\snorm{\mat{\Sigma}_k^{-1}}^{2p+1} \snorm{\mat{V}_{\rho -k}\transp \mat{S} }
+\snorm{(\mat{V}\transp_k \mat{S})^{-1}} =
+\left(\frac{\sigma_{k+1}(\mat{A})}{\sigma_k(\mat{A})}\right)^{2p+1}
+\snorm{\mat{V}_{\rho -k}\transp \mat{S} } \snorm{(\mat{V}\transp_k
+\mat{S})^{-1}}.
+\]
+\end{proof}
+
+Theorem~\ref{ch5:thm:maingapbound} is a refinement of the following lemma, which
+does not require $\mat{S}$ to have $k$ columns. If $\mat{S}$ has more than $k$
+columns, then $\rank(\mat{A}\mat{S})$ may be larger than $k,$ in which case it
+is appropriate to consider $\sin \Theta(\mat{A}\mat{S}, \mat{A}_k)$ rather than
+$\gap(\mat{A}\mat{S}, \mat{A}_k).$
+
+\begin{lemma}
+Let $\mat{S} \in \R^{m \times k}$ be such that $\rank(\mat{A}_k \mat{S}) = k,$
+then 
+\[
+\sin^2\Theta(\mat{A}\mat{S}, \mat{A}_k) = 1 - \lambda_k(\mat{A}_k \mat{S}
+(\mat{S}\transp \mat{A}\transp \mat{A} \mat{S})^\pinv \mat{S}\transp
+\mat{A}_k\transp ).
+\]
+\label{ch5:lemma:gapbound}
+\end{lemma}
+
+\begin{remark}
+give an intuition for why this expression makes sense.
+\end{remark}
+
+Lemma~\ref{ch5:lemma:gapbound} follows from a generalization of a result originally
+due to Stewart (find reference). We note that our proof is much more intuitive
+than Stewart's original proof, and that we have eliminated all assumptions on
+the rank of the involved matrices. The proof of
+Lemma~\ref{ch5:lemma:rangeperturbation} is postponed until the end of the section.
+
+\begin{lemma}
+Suppose $\mat{D} = \mat{C} + \mat{E}$ where $\mat{C}$ and $\mat{E}$ satisfy
+$\mat{P}_{\mat{C}} \mat{E} = \mat{0}.$ Then
+\[
+\snorms{(\mat{I} - \mat{P}_{\mat{D}})\mat{P}_{\mat{C}}} = 1 -
+\lambda_{\rank(\mat{C})}(\mat{C}(\mat{D}\transp \mat{D})^\pinv \mat{C}\transp).
+\]
+\label{ch5:lemma:rangeperturbation}
+\end{lemma}
+
+We show how Lemma~\ref{ch5:lemma:gapbound} follows from
+Lemma~\ref{ch5:lemma:rangeperturbation}.
+
+\begin{proof}[Proof of Lemma~\ref{ch5:lemma:gapbound}]
+In Lemma~\ref{ch5:lemma:rangeperturbation}, take $\mat{C} = \mat{A}_k \mat{S}$ and
+$\mat{E} = \mat{A}_{\rho - k} \mat{S}$ so that $\mat{D} = \mat{A}\mat{S} =
+\mat{C} + \mat{E}.$ Indeed, since $\rank(\mat{A}_k\mat{S}) = k =
+\rank(\mat{A}_k),$ the range spaces of $\mat{A}_k \mat{S}$ and $\mat{A}_k$ are
+identical, so $\mat{P}_{\mat{C}} \mat{E} = \mat{P}_{\mat{A}_k} \mat{A}_{\rho -k}
+\mat{S} = \mat{0}.$ 
+
+An application of Lemma~\ref{ch5:lemma:rangeperturbation} gives
+\[
+\gap(\mat{A}\mat{S}, \mat{A}_k)^2 = \gap(\mat{A}\mat{S}, \mat{A}_k \mat{S})^2 =
+\snorms{(\mat{I} - \mat{P}_{\mat{D}})\mat{P}_{\mat{C}}} = 1 -
+\lambda_k(\mat{A}_k\mat{S}(\mat{S}\transp \mat{A}\transp \mat{A} \mat{S})^\pinv
+\mat{S}\transp \mat{A}_k\transp).
+\]
+\end{proof}
+
+If we additionally assume that $\mat{S}$ has $k$ columns, then the $\sin\Theta$
+expression considered in Lemma~\ref{ch5:lemma:gapbound} is in fact a gap.
+Furthermore, the quantities in the bound can be nicely manipulated, leading to
+Theorem~\ref{ch5:thm:maingapbound}.
+
+\begin{proof}[Proof of Theorem~\ref{ch5:thm:maingapbound}]
+Note that $\mat{A}_k \mat{S}$ has full colum rank, so $\mat{S}\transp
+\mat{A}_k\transp \mat{A}_k \mat{S} \succ \mat{0}$ is invertible. It follows that
+$\mat{S}\transp \mat{A}\transp \mat{A} \mat{S} = \mat{S}\transp \mat{A}_k\transp
+\mat{A}_k \mat{S} + \mat{S}\transp \mat{A}_{\rho -k}\transp \mat{A}_{\rho -k}
+\mat{S} \succ \mat{0}$ is also invertible. Hence
+\begin{align*}
+\lambda_k(\mat{A}_k\mat{S}(\mat{S}\mat{A}\transp\mat{A}\mat{S})^\pinv
+\mat{S}\transp \mat{A}_k\transp) & = \lambda_k(\mat{U}_k \mat{\Sigma}_k
+\mat{V}_k^t \mat{S} (\mat{S}\mat{A}\transp\mat{A}\mat{S})^{-1} \mat{S}\transp
+\mat{V}_k \mat{\Sigma}_k \mat{U}_k\transp) \\
+& = \lambda_k(\mat{\Sigma}_k \mat{V}_k^t \mat{S}
+(\mat{S}\mat{A}\transp\mat{A}\mat{S})^{-1} \mat{S}\transp \mat{V}_k
+\mat{\Sigma}_k) \\
+& = \lambdamax{( \mat{S}\transp \mat{V}_k \mat{\Sigma}_k)^{-1}
+\mat{S}\mat{A}\transp\mat{A}\mat{S} (\mat{\Sigma}_k \mat{V}_k^t \mat{S}
+)^{-1}}^{-1} \\
+& = \lambdamax{\mat{I} +( \mat{S}\transp \mat{V}_k \mat{\Sigma}_k)^{-1}
+\mat{S}\transp \mat{V}_{\rho -k} \mat{\Sigma}_{\rho-k}^2 \mat{V}_{\rho
+-k}\transp \mat{S}  (\mat{\Sigma}_k \mat{V}_k^t \mat{S} )^{-1}}^{-1} \\
+& = (1 + \snorms{\mat{\Sigma}_{\rho-k} \mat{V}_{\rho -k}\transp \mat{S} 
+(\mat{\Sigma}_k \mat{V}_k\transp \mat{S} )^{-1}})^{-1} \\
+& = (1 + \snorms{\mat{\Sigma}_{\rho-k} \mat{V}_{\rho - k}\transp \mat{S}
+(\mat{V}_k\transp \mat{S})^{-1} \mat{\Sigma}_k^{-1}})^{-1} \\
+& = (1 + \gamma^2)^{-1}.
+\end{align*}
+
+The result follows by substituting this expression into the expression for the
+gap given in Lemma~\ref{ch5:lemma:gapbound}.
+\end{proof}
+
+\begin{remark}
+When $\mat{S}$ has more than $k$ columns, the proof of
+Lemma~\ref{ch5:lemma:gapbound} actually gives a measure on the extent to which
+$\mat{A}\mat{S}$ contains the range space of $\mat{A}_k$:
+\[
+\sin(\theta(\mat{A}\mat{S}, \mat{A}_k)) = 1 - \lambdamin{\mat{A}_k
+\mat{S}(\mat{S}\transp \mat{A}\transp \mat{A} \mat{S})^\pinv \mat{S}\transp
+\mat{A}_k\transp}.
+\]
+But how can this expression be further developed analogously to
+Lemma~\ref{lemma:refinedgapbound}, since the pseudoinversion is not an
+inversion? Can one obtain a similar dependence on $\gamma$, except with $\gamma$
+defined using a pseudoinverse instead of an inverse?
+\end{remark}
+
+\begin{remark}
+In order to use Lemmas~\ref{ch5:lemma:correlationapproximation}
+and~\ref{lemma:refinedgapbound} as the basis of an algorithm for approximating
+correlations, we need to supply a $\mat{S}$ which has $k$ columns and which
+ensures that $\mat{A}_k\mat{S}$ \emph{and} $\mat{B}_k \mat{S}$ are both
+rank-$k.$ 
+
+If we take $\mat{S}$ to be a $n \times k$ matrix of i.i.d. standard Gaussians,
+then one can show that $\gamma = \frac{\sigma_{k+1}}{\sigma_k}\Omega(k + \sqrt{k
+(n-k)})$ with high probability, for both $\mat{A}$ and $\mat{B}$.
+
+Is there a better choice of $\mat{S}?$
+\end{remark}
+
+\begin{remark}
+We can say something if $\mat{S}$ is uniformly (Haar) distributed on the set of
+$n \times k$ orthonormal matrices. In this case, we have that
+\[
+\gamma \leq \frac{\sigma_{k+1}}{\sigma_k} \sigma_k(\mat{V}_k\transp
+\mat{S})^{-1}
+\]
+where $\sigma_k(\mat{V}_k\transp \mat{S})$ is a correlation, so can be bounded
+with
+\begin{align*}
+|1 - \sigma_k(\mat{V}_k\transp \mat{S})| & = |\sigma_k(\mat{V}_k\transp
+\mat{V}_k) - \sigma_k(\mat{V}_k\transp \mat{S})| =
+|\sigma_k(\mat{P}_{\mat{V}_k}) - \sigma_k(\mat{P}_{\mat{V}_k}
+\mat{P}_{\mat{S}})| \\
+ & \leq \snorm{\mat{P}_{\mat{V}_k} - \mat{P}_{\mat{V}_k} \mat{P}_{\mat{S}}} =
+\gap(\mat{V}_k, \mat{S}).
+\end{align*}
+Since $\mat{S}$ is randomly oriented, we can assume the same of $\mat{V}_k$
+without loss of generality. Doing so, we can apply an expression due to Edelman
+et al. for the cdf of the gap between two random spaces in the Grassmanian
+$G(n,k)$ when $k < \frac{n+1}{2}$:
+\[
+\Prob{ \gap(\mat{V}_k, \mat{S}) > t} = 1 -
+\frac{\Gamma\left(\frac{k+1}{2}\right)\Gamma\left(\frac{n-k+1}{2}\right)}{\sqrt{
+\pi}\Gamma\left(\tfrac{n+1}{2}\right)} t^{k(n-k)} \cdot
+{}_2F_1\left(\frac{n-k}{2}, \frac{1}{2}; \frac{n+1}{2}; t^2 \mat{I}_k \right),
+\]
+where ${}_2F_1(\ldots)$ is the Gaussian hypergeometric function of matrix
+argument. Assume $t$ is such that this probability is at most $\delta,$ then we
+have that
+\[
+\gamma \leq \frac{\sigma_{k+1}}{\sigma_k} (1 - t)^{-1}
+\]
+with probability at least $1 - \delta.$
+
+\end{remark}
+
+\begin{remark}[Power method]
+Of course we can use the power method to our advantage, since
+\[
+\gap(\mat{A}_k, \mat{A}\mat{S}) = \gap(\mat{A}_k, (\mat{A} \mat{A}\transp)^p
+\mat{A} \mat{S}),
+\]
+and our analysis shows that for the latter expression, $\gamma$ is then
+proportional to the $(2p+1)$th power of the spectral gap of $\mat{A}:$
+\[
+\gamma \leq \left(\frac{\sigma_{k+1}}{\sigma_k}\right)^{2p+1}
+\snorm{\mat{V}_{\rho-k}\transp\mat{S}} \sigma_k(\mat{V}_k\transp \mat{S})^{-1}.
+\]
+
+Fix $\epsilon \in (0,1).$ Consider the case where we are using Gaussians to
+sample, then we have
+\[
+\gamma = \left(\frac{\sigma_{k+1}}{\sigma_k}\right)^{2p+1} \Omega(k +
+\sqrt{k(n-k)})
+\]
+with high probability. Thus if $p = \Omega(\log(\varepsilon^{-1}
+\sqrt{kn})/\log(c^{-1}))$ where $c$ is the largest of the spectral gaps of
+$\mat{A}$ and $\mat{B}$, then $\gamma = \varepsilon$ for both matrices with high
+probability, and it follows that 
+\[
+|\sigma_i(\mat{A}_k, \mat{B}_k) - \sigma_i((\mat{A} \mat{A}\transp)^p \mat{A}
+\mat{S}, (\mat{B} \mat{B}\transp)^p \mat{B} \mat{S})| \leq
+\frac{2}{\sqrt{1+\varepsilon^{-2}}} < 2\varepsilon.
+\]
+Experimentally, there does not seem to be a dependence on the dimensions in $p.$
+
+The cost of this algorithm is $\const{O}(m n p k).$ The cost of the
+deterministic algorithm is $\const{O}(m n k),$ (using truncated SVDs from Krylov
+subspace methods) but the constant here may be very large. Use experiments to
+compare run times.
+\end{remark}
+
+\begin{remark}
+It is clear that the algorithm suggested requires $\mat{S}$ to be rank $k$
+(maybe it could have more than $k$ columns, but it must be rank $k$). Clearly
+the rank cannot be smaller than $k$. Now assume that $\rank(\mat{S}) > k,$ then
+if we use this $\mat{S}$ on matrices $\mat{A}$ and $\mat{B}$ which have the same
+rank as $\mat{S},$ then potentially (certainly this holds if $\mat{S}$ is
+Gaussian)
+\[
+\sigma_i(\mat{A}\mat{S}, \mat{B}\mat{S}) = \sigma_i(\mat{A},\mat{B}), 
+\]
+and in general there is no connection between these correlations and those of
+$\mat{A}_k$ and $\mat{B}_k.$
+\end{remark}
+
+Now we prove Lemma~\ref{ch5:lemma:rangeperturbation}.
+
+\begin{proof}[Much simpler proof of Lemma~\ref{ch5:lemma:rangeperturbation}]
+Let the columns of $\mat{U}$ constitute an orthonormal basis for the range of
+$\mat{C}$ and those of $\mat{V}$ constitute an orthonormal basis for the range
+of $\mat{D}$. Denoting the rank of $\mat{C}$ by $k,$ we observe that 
+\begin{align*}
+\snorms{(\mat{I} - \mat{P}_{\mat{D}})\mat{P}_{\mat{C}}} & =
+\snorm{\mat{P}_{\mat{C}}(\mat{I} - \mat{P}_{\mat{D}})\mat{P}_{\mat{C}}}  \\
+& = \snorm{\mat{U}\mat{U}\transp - \mat{U}\mat{U}\transp \mat{V}\mat{V}\transp
+\mat{U}\mat{U}\transp} 
+= \snorm{\mat{U}(\mat{I} - \mat{U}\transp \mat{V}\mat{V}\transp
+\mat{U})\mat{U}\transp} \\
+& = \snorm{\mat{I} - \mat{U}\transp \mat{V}\mat{V}\transp \mat{U}} 
+\end{align*}
+The first equality follows from the fact that $\snorms{\mat{A}} =
+\snorm{\mat{A}\mat{A}\transp}$ and the idempotence of projections. The final
+manipulation uses the unitary invariance of the spectral norm and the fact that
+$\mat{U}\transp$ maps the unit ball of its domain onto the unit ball of $\R^k.$
+
+It follows that 
+\[
+\snorms{(\mat{I} - \mat{P}_{\mat{D}})\mat{P}_{\mat{C}}} = 1 -
+\lambda_k(\mat{U}\transp \mat{V}\mat{V}\transp \mat{U}) 
+ = 1 - \lambda_k(\mat{V}\transp \mat{U} \mat{U}\transp \mat{V}) = 1 -
+\lambda_k(\mat{U} \mat{U}\transp \mat{V} \mat{V}\transp),
+\]
+where our manipulations are justified by the fact that, when the two products
+are well-defined, the eigenvalues of $\mat{A}\mat{B}$ are identical to those of
+$\mat{B}\mat{A}$ up to multiplicity of the zero eigenvalues. We further observe
+that 
+\begin{align*}
+\lambda_k(\mat{U} \mat{U}\transp \mat{V} \mat{V}\transp) & =
+\lambda_k(\mat{P}_{\mat{C}} \mat{P}_{\mat{D}}) = \lambda_k(\mat{P}_{\mat{C}}
+\mat{D} \mat{D}^\pinv) \\
+& = \lambda_k(\mat{P}_{\mat{C}} (\mat{C} + \mat{E}) \mat{D}^\pinv) =
+\lambda_k(\mat{C} \mat{D}^\pinv)
+\end{align*}
+because $\mat{P}_{\mat{C}} \mat{E} = \mat{0},$
+so in fact
+\begin{equation}
+\label{ch5:eqn:gapintermediateexpression}
+\snorms{(\mat{I} - \mat{P}_{\mat{D}})\mat{P}_{\mat{C}}} = 1 - \lambda_k(\mat{C}
+\mat{D}^\pinv).
+\end{equation}
+
+Recall one expression for the pseudoinverse, $\mat{D}^\dagger = (\mat{D}\transp
+\mat{D})^\dagger \mat{D}\transp.$ Using this identity, we find that
+\begin{align*}
+\lambda_k(\mat{C} \mat{D}^\dagger) & = \lambda_k(\mat{P}_{\mat{C}} \mat{C}
+(\mat{D}\transp \mat{D})^\dagger \mat{D}\transp) =  \lambda_k(\mat{C}
+(\mat{D}\transp \mat{D})^\dagger \mat{D}\transp \mat{P}_{\mat{C}}) \\
+ & = \lambda_k(\mat{C} (\mat{D}\transp \mat{D})^\pinv (\mat{P}_{\mat{C}}
+\mat{D})\transp).
+\end{align*}
+Since $\mat{P}_{\mat{C}} \mat{D} = \mat{P}_{\mat{C}}(\mat{C} + \mat{E}) =
+\mat{C},$ we conclude that
+\[
+\lambda_k(\mat{C}\mat{D}^\dagger) = \lambda_k(\mat{C}(\mat{D}\transp
+\mat{D})^\dagger \mat{C}\transp).
+\]
+Substituting this equality into \eqref{ch5:eqn:gapintermediateexpression} gives the
+desired identity.
+\end{proof}
+
+%\begin{proof}[Proof of Lemma~\ref{ch5:lemma:rangeperturbation}]
+%Let $\mat{C} = \mat{U}\mat{S}$ where $\mat{U}$ has $k$ columns and $\mat{S}$ has full row-rank. Likewise, let $\mat{D} = \mat{V}\mat{T}$ where $\mat{V}$ has $\rank(\mat{D})$ columns and $\mat{T}$ has full row-rank. First note that
+%\begin{align*}
+%\snorms{(\mat{I} - \mat{P}_{\mat{D}})\mat{P}_{\mat{C}}} & = \snorm{\mat{P}_{\mat{C}}(\mat{I} - \mat{P}_{\mat{D}})\mat{P}_{\mat{C}}}  \\
+%& = \snorm{\mat{U}\mat{U}\transp - \mat{U}\mat{U}\transp \mat{V}\mat{V}\transp \mat{U}\mat{U}\transp} 
+%= \snorm{\mat{U}(\mat{I} - \mat{U}\transp \mat{V}\mat{V}\transp \mat{U})\mat{U}\transp} \\
+%& = \snorm{\mat{I} - \mat{U}\transp \mat{V}\mat{V}\transp \mat{U}} = 1 - \lambda_k(\mat{U}\transp \mat{V}\mat{V}\transp \mat{U}).
+%\end{align*}
+%The result will follow if we establish that $\lambda_k(\mat{C}(\mat{D}\transp \mat{D})^\pinv \mat{C}\transp) = \lambda_k(\mat{U}\transp \mat{V}\mat{V}\transp \mat{U}).$
+%
+%As a first step in this direction, we observe that, because $\mat{T}$ has full row-rank, the identity $\mat{T}\mat{T}^\pinv = \mat{I}$ holds, which implies that 
+%\[
+%(\mat{C}\transp \mat{D} \mat{T}^\pinv)  (\mat{C}\transp \mat{D} \mat{T}^\pinv)\transp = \mat{S}\transp \mat{U}\transp \mat{V}\mat{V}\transp \mat{U} \mat{S}.
+%\]
+%Another expression for the left hand expression can be found: the fact that $\mat{P}_{\mat{C}} \mat{E} = \mat{0}$ implies that $\mat{U}\transp \mat{E} = \mat{0}$, so $\mat{C}\transp \mat{E} = \mat{S}\transp \mat{U}\transp \mat{E} = \mat{0},$ and thus $\mat{C}\transp \mat{D} = \mat{C}\transp \mat{C} = \mat{S}\transp \mat{S}.$ This in turn implies
+%\[
+%(\mat{C}\transp \mat{D} \mat{T}^\pinv)  (\mat{C}\transp \mat{D} \mat{T}^\pinv)\transp = \mat{S}\transp \mat{S} \mat{T}^\pinv (\mat{T}^\pinv)\transp \mat{S}\transp \mat{S}.
+%\]
+%Because $\mat{T}$ has full row-rank, $\mat{T}\transp$ has full column-rank, and 
+%\[
+%(\mat{D}\transp \mat{D})^\pinv = (\mat{T}\transp \mat{T})^\pinv = \mat{T}^\pinv (\mat{T}\transp)^\pinv = \mat{T}^\pinv (\mat{T}^\pinv)\transp.
+%\]
+%So far we have shown that
+%\[
+%\mat{S}\transp \mat{S} (\mat{D}\transp \mat{D})^\pinv \mat{S}\transp \mat{S} = \mat{S}\transp \mat{U}\transp \mat{V} \mat{V}\transp \mat{U} \mat{S}.
+%\]
+%Observing that $\mat{S}\transp \mat{S} = \mat{C}\transp\mat{C},$ it follows that
+%\[
+%\mat{C}\transp \mat{C} (\mat{D}\transp \mat{D})^\pinv \mat{C}\transp \mat{C} = \mat{S}\transp \mat{U}\transp \mat{V} \mat{V}\transp \mat{U} \mat{S}.
+%\]
+%Conjugate both sides of this identity by $\mat{C}$ to obtain
+%\[
+%\mat{C}\mat{C}\transp \mat{C} (\mat{D}\transp \mat{D})^\pinv \mat{C}\transp \mat{C}\mat{C}\transp = \mat{U}\mat{S}\mat{S}\transp \mat{U}\transp \mat{V} \mat{V}\transp \mat{U} \mat{S}\mat{S}\transp \mat{U}\transp.
+%\]
+%Because $\mat{S}\mat{S}\transp = \mat{U}\transp \mat{C} \mat{C}\transp \mat{U},$ it follows that
+%\begin{align*}
+%\mat{C}\mat{C}\transp \mat{C} (\mat{D}\transp \mat{D})^\pinv \mat{C}\transp \mat{C}\mat{C}\transp 
+%& = \mat{U}\mat{U}\transp \mat{C} \mat{C}\transp \mat{U}\mat{U}\transp \mat{V} \mat{V}\transp \mat{U}\mat{U}\transp \mat{C} \mat{C}\transp \mat{U}\mat{U}\transp \\
+%& = \mat{C} \mat{C}\transp \mat{U}\mat{U}\transp \mat{V} \mat{V}\transp \mat{U}\mat{U}\transp \mat{C} \mat{C}\transp.
+%\end{align*}
+%The second equality holds because $\mat{U}\mat{U}\transp$ is the projection onto the range space of $\mat{C}.$
+%Conjugate both sides of the identity with $(\mat{C}\mat{C}\transp)^\pinv$ and use the fact that $(\mat{C}\mat{C}\transp)^\pinv \mat{C}\mat{C}\transp = \mat{U} \mat{U}\transp$ to obtain that
+%\[
+%\mat{C} (\mat{D}\transp \mat{D})^\pinv \mat{C}\transp = \mat{U}\mat{U}\transp \mat{V}\mat{V}\transp \mat{U} \mat{U}\transp.
+%\]
+%It follows that 
+%\[
+%\lambda_k(\mat{C} (\mat{D}\transp \mat{D})^\pinv \mat{C}\transp) = \lambda_k(\mat{U}\transp \mat{V}\mat{V}\transp \mat{U}).
+%\]
+%\end{proof}
+
+\section{Application 1: Additive approximation of leverage scores}
+
+This is essentially the naive algorithm for estimating leverage scores: form a
+low-rank approximation to $\mat{A}$ using the randomized projection paradigm,
+then use the leverage scores of this low-rank approximation as your leverage
+scores. (How good is this in practice, actually?). There's no easy way to
+analyze the error of this algorithm: all you know about the low-rank
+approximation is that it is close in some norm (spectral or Frobenius);
+converting this to a bound on the difference in the leverage scores is difficult
+(maybe use a Kahan-Davis type result, but not short). 
+
+Mahoney notes that in general leverage scores are not well-defined (e.g. in case
+where there is no spectral gap), and \emph{defines} $\norm{\cdot}$-approximate
+leverage scores: find a low-rank matrix that is close by in the chosen norm and
+use its leverage scores as the approximate leverage scores. However, when there
+is a spectral gap, one may want an algorithm that approximates the leverage
+scores from $\mat{A}$ rather than a low-rank approximation. Further, it is
+counterintuitive that the approximate leverage scores should depend on the
+choice of norm.
+
+\begin{algorithm}
+
+ \caption{Approximation of leverage and cross-leverage scores}
+ \label{ch5:alg:levscore-approx}
+ \algrenewcommand\algorithmicrequire{\textbf{Input:}}
+ \algrenewcommand\algorithmicensure{\textbf{Output:}}
+ \begin{algorithmic}[1]
+  \Require{ $\mat{A}$, an $m \times n$ matrix; an integer $k \leq \min\{m,n\};$
+an integer $p \geq 1$ }
+  \Ensure{$\{\tau_{ij}\}_{i=1}^n,$ approximations to the rank-$k$ leverage and
+cross-leverage scores of the columns of $\mat{A}$}
+  \Statex
+  
+ \State Compute $\mat{Y} = (\mat{A}\transp \mat{A})^p \mat{A}\transp \mat{S},$
+where $\mat{S}$ is an $m \times k$ matrix of i.i.d. standard Gaussian r.v.s. 
+ \State Form the reduced QR decomposition $\mat{Y} = \mat{Q} \mat{R}.$
+ \State Let $\tau_{ij} = (\mat{Q}\mat{Q}\transp)_{ij}.$
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{thm}
+The errors of the approximate leverage scores computed using
+Algorithm~\ref{ch5:alg:levscore-approx} are uniformly bounded by $\varepsilon$ when
+$p \geq .$ The running time of Algorithm~\ref{ch5:alg:levscore-approx} is .
+\end{thm}
+
+\begin{proof}
+We simply note that the differences between the leverage scores and approximate
+leverage scores computed in Algorithm~\ref{ch5:alg:levscore-approx} satisfy
+\[
+| (\mat{P}_{(\mat{A}\transp)_k})_{ij} - \tau_{ij}| = |
+(\mat{P}_{(\mat{A}\transp)_k})_{ij} - (\mat{P}_{\mat{Y}})_{ij} | \leq
+\snorm{\mat{P}_{(\mat{A}\transp)_k} - \mat{P}_{\mat{Y}}}.
+\]
+The latter quantity is bounded in Lemma~\ref{lem:powermethod-gamma-bound}, which
+gives
+\[
+| (\mat{P}_{(\mat{A}\transp)_k})_{ij} - \tau_{ij}| \leq \varepsilon
+\]
+when $p$ is selected as suggested.
+\end{proof}
+
+Refer to experiments section.
+
+\section{Application 2: Approximation of regularized cross correlation scores}
+
+The following lemma bounds the error in approximating the principal angles of
+$\mat{A}_k$ and $\mat{B}_\ell$ using the correlations between $\tilde{\mat{A}}$
+and $\tilde{\mat{B}}.$ We constrain $\mat{A}_k$ and $\tilde{\mat{A}}$ (and
+likewise for $\mat{B}_\ell$ and $\tilde{\mat{B}}$) to have the same rank and
+number of rows, but we do not require them to have the same number of columns. 
+
+\begin{lemma}
+Assume $\mat{A}$ and $\mat{B}$ each have $m$ rows. Let $\tilde{\mat{A}}$ and
+$\tilde{\mat{B}}$ each also have $m$ rows and satisfy $\rank(\tilde{\mat{A}}) =
+\rank(\mat{A}_k)$ and $\rank(\tilde{\mat{B}}) = \rank(\mat{B}_\ell).$ Then 
+\[
+|\sigma_i(\mat{A}_k, \mat{B}_\ell) - \sigma_i(\tilde{\mat{A}}, \tilde{\mat{B}})|
+\leq \gap(\tilde{\mat{A}}, \mat{A}_k) + \gap(\tilde{\mat{B}}, \mat{B}_\ell)
+\]
+for $i = 1,2,\ldots, \min\{\rank(\mat{A}_k), \rank(\mat{B}_\ell)\}.$
+\label{ch5:lemma:correlationapproximation}
+\end{lemma}
+
+\begin{proof}
+We first observe that when $\mat{U}$ and $\mat{V}$ are two matrices with
+orthonormal columns, 
+\begin{align*}
+\sigma_i(\mat{U}\transp \mat{V})^2 
+& = \lambda_i(\mat{U}\transp \mat{V} \mat{V}\transp \mat{U}) 
+= \lambda_i(\mat{U}\mat{U}\transp \mat{V}\mat{V}\transp)
+= \lambda_i(\mat{P}_{\mat{U}} \mat{P}_{\mat{V}}) \\
+& = \lambda_i(\mat{P}_{\mat{U}} \mat{P}_{\mat{U}} \mat{P}_{\mat{V}}) 
+= \lambda_i(\mat{P}_{\mat{U}} \mat{P}_{\mat{V}} \mat{P}_{\mat{U}}) 
+= \lambda_i(\mat{P}_{\mat{U}} \mat{P}_{\mat{V}} \mat{P}_{\mat{V}}
+\mat{P}_{\mat{U}}) \\
+& = \sigma_i(\mat{P}_{\mat{U}} \mat{P}_{\mat{V}})^2.
+\end{align*}
+Thus $\sigma_i(\mat{U}\transp \mat{V}) = \sigma_i(\mat{P}_{\mat{U}}
+\mat{P}_{\mat{V}})$ for any two such matrices.
+
+From this observation and the definition of the canonical correlations, it
+follows that 
+\[
+|\sigma_i(\mat{A}_k, \mat{B}_\ell) - \sigma_i(\tilde{\mat{A}}, \tilde{\mat{B}})|
+= |\sigma_i(\mat{U}_{\mat{A}_k}\transp \mat{U}_{\mat{B}_\ell}) -
+\sigma_i(\mat{U}_{\tilde{\mat{A}}}\transp \mat{U}_{\tilde{\mat{B}}})| =
+|\sigma_i(\mat{P}_{\mat{A}_k} \mat{P}_{\mat{B}_\ell}) -
+\sigma_i(\mat{P}_{\tilde{\mat{A}}} \mat{P}_{\tilde{\mat{B}}})|.
+\]
+
+The desired relation is reached after an application of Weyl's inequality and
+the triangle inequality:
+\begin{align*}
+|\sigma_i(\mat{A}_k, \mat{B}_\ell) - \sigma_i(\tilde{\mat{A}}, \tilde{\mat{B}})|
+& \leq \snorm{\mat{P}_{\mat{A}_k} \mat{P}_{\mat{B}_\ell} -
+\mat{P}_{\tilde{\mat{A}}} \mat{P}_{\tilde{\mat{B}}} } \\
+& \leq \snorm{\mat{P}_{\mat{A}_k} \mat{P}_{\mat{B}_\ell} -
+\mat{P}_{\tilde{\mat{A}}} \mat{P}_{\mat{B}_\ell}} +
+\snorm{\mat{P}_{\tilde{\mat{A}}} \mat{P}_{\mat{B}_\ell} -
+\mat{P}_{\tilde{\mat{A}}} \mat{P}_{\tilde{\mat{B}}} } \\
+& \leq \snorm{\mat{P}_{\mat{A}_k} - \mat{P}_{\tilde{\mat{A}}} } +
+\snorm{\mat{P}_{\mat{B}_\ell} - \mat{P}_{\tilde{\mat{B}}} } \\
+& = \gap(\tilde{\mat{A}}, \mat{A}_k) + \gap(\tilde{\mat{B}}, \mat{B}_\ell).
+\end{align*}
+
+\end{proof}
+
+This suggests the following algorithm for approximating regularized
+cross-correlation scores:
+
+\begin{algorithm}
+
+ \caption{Approximation of regularized cross correlation scores}
+ \label{ch5:alg:cca-approx}
+ \algrenewcommand\algorithmicrequire{\textbf{Input:}}
+ \algrenewcommand\algorithmicensure{\textbf{Output:}}
+ \begin{algorithmic}[1]
+  \Require{ $\mat{A}$, an $m \times n$ matrix; $\mat{B}$, an $m \times p$
+matrix; integers $k,\ell \leq \min\{m,n\};$ integers $p_1,p_2 \geq 1$ }
+  \Ensure{$\{c_i\}_{i=1}^{\min\{\rank(\mat{A}_k), \rank(\mat{B}_\ell)\}},$
+approximations to the cross correlation scores
+$\{\sigma_i(\mat{A}_k,\mat{B}_\ell)\}$.}
+  \Statex
+  
+ \State Compute $\tilde{\mat{A}} = (\mat{A} \mat{A}\transp)^{p_1} \mat{A}
+\mat{S},$ where $\mat{S}$ is an $n \times k$ matrix of i.i.d. standard Gaussian
+r.v.s. 
+ \State Compute $\tilde{\mat{B}} = (\mat{B} \mat{B}\transp)^{p_2} \mat{B}
+\mat{S},$ where $\mat{S}$ is an $n \times \ell$ matrix of i.i.d. standard
+Gaussian r.v.s. 
+ \State Let $c_i$ be the $i$th cross correlation score between $\tilde{\mat{A}}$
+and $\tilde{\mat{B}}$ (computed e.g., using the Bj\"orck-Golub
+algorithm~\protect{\cite{BG73}}).
+  \end{algorithmic}
+\end{algorithm}
+
+Refer to experiments section.
+
+%\bibliographystyle{amsalpha}
+%\bibliography{ccabib}

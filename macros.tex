@@ -1,0 +1,221 @@
+%!TEX root = thesis.tex
+
+\renewcommand{\star}{*}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\gap}{gap}
+
+\def\pinv{\dagger}
+\def\transp{^T}
+% 
+\newcommand{\samats}[1]{\ensuremath{\mathbb{M}^{#1}_{\mathrm{sa}}}}
+\newcommand{\s}{\sigma} % singular values
+\newcommand{\asymO}[1]{\ensuremath{\mathop{\text{O}}\!\left(#1\right)}}
+\DeclareMathOperator{\sgn}{sgn}
+
+\newcommand{\norm}[1]{\ensuremath{\left\|#1\right\|}}
+\newcommand{\supoverinfball}{\ensuremath{\max_{\infnorm{\mat{u}} = 1}}}
+\newcommand{\supovertball}{\ensuremath{\max_{\norm{\mat{u}}_2 = 1}}}
+\newcommand{\supoverqball}{\ensuremath{\max_{\qnorm{\mat{u}} = 1}}}
+\newcommand{\eqqcolon}{=\mathrel{\mathop:}} %this may not be what I want, =:
+
+\newcommand{\mat}[1]{\ensuremath{\mathbf{#1}}}
+\renewcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\e}{\ensuremath{\mathrm{e}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\Prob}[1]{\ensuremath{\mathbb{P}\left\{#1\right\}}}
+\newcommand{\CondProb}[2]{\ensuremath{\mathbb{P}\left\{#1 \,\left|\, #2 \right.\right\}}}
+\newcommand{\lnorm}[2]{\ensuremath{\left\| #2 \right\|_{L_{#1}}}}
+\newcommand{\lipnorm}[1]{\ensuremath{\left\| #1 \right\|_\Pi}}
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\Cfield}{\ensuremath{\mathbb{C}}}
+\newcommand{\randcon}{\ensuremath{\Psi}}
+\newcommand{\indicator}[1]{\ensuremath{\mathbb{1}\left\{#1\right\}}}
+
+\newcommand{\xiNorm}[1]{\ensuremath{\left\|#1\right\|_\xi}}
+\newcommand{\TNorm}[1]{\ensuremath{\left\|#1\right\|_2}}
+\newcommand{\TNormS}[1]{\ensuremath{\left\|#1\right\|_2^2}}
+\newcommand{\FNorm}[1]{\ensuremath{\left\|#1\right\|_\mathrm{F}}}
+\newcommand{\FNormS}[1]{\ensuremath{\left\|#1\right\|_\mathrm{F}^2}}
+\newcommand{\VTNorm}[1]{\ensuremath{\left\|#1\right\|_2}}
+\newcommand{\VTNormS}[1]{\ensuremath{\left\|#1\right\|_2^2}}
+\newcommand{\tracenorm}[1]{\ensuremath{\trace\left(#1\right)}}
+
+\newcommand{\xinorm}[1]{\ensuremath{\big\|#1\big\|_\xi}}
+\newcommand{\xinorms}[1]{\ensuremath{\big\|#1\big\|_\xi^2}}
+\newcommand{\snorm}[1]{\ensuremath{\left\|#1\right\|_2}}
+\newcommand{\snorms}[1]{\ensuremath{\big\|#1\big\|_2^2}}
+\newcommand{\fnorm}[1]{\ensuremath{\left\|#1\right\|_{\mathrm{F}}}}
+\newcommand{\fnorms}[1]{\ensuremath{\big\|#1\big\|_{\mathrm{F}}^2}}
+\newcommand{\mcnorm}[1]{\ensuremath{\big\|#1\big\|_{\mathrm{mc}}}}
+\newcommand{\mcnorms}[1]{\ensuremath{\big\|#1\big\|_{\mathrm{mc}}^2}}
+
+\newcommand{\pnorm}[1]{\ensuremath{\left\|#1\right\|_p}}
+\newcommand{\qnorm}[1]{\ensuremath{\left\|#1\right\|_q}}
+\newcommand{\infnorm}[1]{\ensuremath{\left\|#1\right\|_\infty}}
+\newcommand{\infonorm}[1]{\ensuremath{\left\|#1\right\|_{\infty\rightarrow 1}}}
+\newcommand{\inftnorm}[1]{\ensuremath{\left\|#1\right\|_{\infty\rightarrow 2}}}
+\newcommand{\onetwonorm}[1]{\ensuremath{\left\|#1\right\|_{1 \rightarrow 2}}}
+\newcommand{\twoinfnorm}[1]{\ensuremath{\left\|#1\right\|_{2 \rightarrow \infty}}}
+\newcommand{\smalltwoinfnorm}[1]{\ensuremath{\|#1\|_{2 \rightarrow \infty}}}
+\newcommand{\infone}{\ensuremath{\infty\!\rightarrow\!\!1}}
+\newcommand{\inftwo}{\ensuremath{\infty\!\rightarrow\!\!2}}
+\newcommand{\infp}{\ensuremath{\infty\!\rightarrow\!p}}
+\newcommand{\twoinf}{\ensuremath{2\!\!\rightarrow\!\!\infty}}
+\newcommand{\colnorm}[1]{\ensuremath{\left\|#1\right\|_{\mathrm{col}}}}
+\newcommand{\rownorm}[1]{\ensuremath{\left\|#1\right\|_{\text{\rmfamily{row}}}}}
+\newcommand{\cutnorm}[1]{\ensuremath{\left\|#1\right\|_{\text{\rmfamily{C}}}}}
+
+\newcommand{\F}{F}
+\newcommand{\lambdamax}[1]{\ensuremath{\lambda_{\mathrm{max}}\left(#1\right)}}
+\newcommand{\lambdamin}[1]{\ensuremath{\lambda_{\mathrm{min}}\left(#1\right)}}
+\newcommand{\sigmamin}[1]{\ensuremath{\sigma_{\mathrm{min}}\left(#1\right)}}
+\newcommand{\sigmamax}[1]{\ensuremath{\sigma_{\mathrm{max}}\left(#1\right)}}
+\newcommand{\Isom}[2]{\ensuremath{\mathbb{V}_{#1}^{#2}}}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\trace}{Tr}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\var}{Var}
+\newcommand{\trbrace}[1]{\ensuremath{\tr\left(#1\right)}}
+\newcommand{\trexp}[1]{\ensuremath{\tr\exp\left(#1\right)}}
+\newcommand{\const}[1]{\ensuremath{\mathrm{#1}}}
+
+\newtheorem{thm}{Theorem}[chapter]
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{lemma}[thm]{Lemma}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{defn}[thm]{Definition}
+
+\theoremstyle{remark}
+\newtheorem{remark}[thm]{Remark}
+
+
+% Bunch of stuff from the SRHT paper, need to eliminate redundancy and fold in
+\newcommand{\Probab}[1]{\mbox{}{\mathbb{P}}\left(#1\right)}
+\newcommand{\Exp}{\mbox{}{\mathbf{E}}}
+\newcommand{\Expect}[1]{\mbox{}{\mathbb{E}}\left[#1\right]}
+\newcommand{\Varnce}[1]{\mbox{}{\mathbf{Var}}\left[#1\right]}
+\newcommand{\Trace }[1]{\mbox{}{\mathrm{Tr}}\left(#1\right)}
+\newcommand{\diag  }[1]{\mbox{}{\textrm{diag}}\left(#1\right)}
+\newcommand{\Sqrt  }[1]{\mbox{}\left(#1\right)^{1/2}}
+\newcommand{\Qdrt  }[1]{\mbox{}\left(#1\right)^{1/4}}
+\newcommand{\FNormB }[1]{\mbox{}\left\|#1\right\|_{\mathrm{F}}  }
+\newcommand{\FNormBS}[1]{\mbox{}\left\|#1\right\|_{\mathrm{F}}^2}
+\newcommand{\FNormF}[1]{\mbox{}\|#1\|_\mathrm{F}^4}
+\newcommand{\FNormQ}[1]{\mbox{}\left\|#1\right\|_\mathrm{F}^4}
+\newcommand{\TNormB }[1]{\mbox{}\left\|#1\right\|_2  }
+\newcommand{\TNormBS}[1]{\mbox{}\left\|#1\right\|_2^2}
+\newcommand{\TNormF}[1]{\mbox{}\|#1\|_2^4}
+\newcommand{\TNormQ}[1]{\mbox{}\left\|#1\right\|_2^4}
+\newcommand{\XNormB }[1]{\mbox{}\left\|#1\right\|_{\xi}  }
+\newcommand{\XNormBS}[1]{\mbox{}\left\|#1\right\|_{\xi}^2}
+\newcommand{\XNorm }[1]{\mbox{}\|#1\|_{\xi}  }
+\newcommand{\XNormS}[1]{\mbox{}\|#1\|_{\xi}^2}
+\newcommand{\PNorm }[1]{\mbox{}\|#1\|_{p}  }
+\newcommand{\PNormS}[1]{\mbox{}\|#1\|_{p}^2}
+\newcommand{\XNormQ}[1]{\mbox{}\left\|#1\right\|_{\xi}^4}
+\newcommand{\VTNormQ}[1]{\mbox{}\left|#1\right|^4}
+\newcommand{\VTTNorm }[1]{\mbox{}\left|#1\right|_2  }
+\newcommand{\VTTNormS}[1]{\mbox{}\left|#1\right|_2^2}
+\newcommand{\VTTNormQ}[1]{\mbox{}\left|#1\right|_2^4}
+\newcommand{\MCNorm}[1]{\mbox{}\|#1\|_{1 \rightarrow 2}}
+\newcommand{\MCNormS}[1]{\mbox{}\|#1\|_{1 \rightarrow 2}^2}
+\newcommand{\INorm}[1]{\mbox{}\|#1\|_\infty}
+
+\newcommand{\qedsymb}{\hfill{\rule{2mm}{2mm}}}
+
+\newcommand{\dvc}{\ensuremath{d_{\small \sf VC}}}
+\newcommand{\abs }[1]{\left|#1\right|}
+\newcommand{\EE}[1]{\ensuremath{\mathbb{E}\left[#1\right] } }
+\newcommand{\condE}[2]{\ensuremath{\mathbb{E}\left[#2 \,\left|\, #1 \right.\right]}}
+
+\def\gammab{{\bm{\gamma}}}
+\def\kappab{{\bm{\kappa}}}
+\def\sig{{\bm{\Sigma}}}
+\def\sigplus{{\bm{\Sigma}^{+}}}
+\def\siginv{{\bm{\Sigma}^{-1}}}
+\def\bet{{\bm{\beta}}}
+\def\one{{\bm{1}}}
+\def\exp{\ensuremath{\mathrm{exp}}}
+\def\rank{\mathrm{rank}}
+\newcommand{\stablerank}[1]{\operatorname{sr}\left(#1\right)}
+
+%\def\cond{\hbox{\rm \mathbf{k}}}
+
+\def\col{\hbox{\mathrm{col}}}
+\def\ker{\hbox{\mathrm{ker}}}
+\def\ahat{{\hat\a}}
+\def\b{{\mathbf b}}
+%\def\e{{\mathbf e}}
+\def\expe{\mathrm{e}}
+\def\q{{\mathbf q}}
+\def\rb{{\mathbf r}}
+%\def\s{{\mathbf s}}
+%\def\u{{\mathbf u}}
+\def\v{{\mathbf v}}
+\def\x{{\mathbf x}}
+\def\y{{\mathbf y}}
+\def\z{{\mathbf z}}
+\def\h{{\mathbf h}}
+\def\d{{\mathbf \delta}}
+\def\xhat{{\hat\x}}
+\def\yhat{{\hat\y}}
+\def\A{\matA}
+\def\B{\matB}
+%\def\C{\matC}
+\def\Ahat{\hat\matA}
+\def\Atilde{\tilde\matA}
+\def\Btilde{\tilde\matB}
+\def\Stilde{\tilde\matS}
+\def\Utilde{\tilde\matU}
+\def\Vtilde{\tilde\matV}
+%\def\E{{\cl E}}
+\def\G{{\cl G}}
+\def\hset{{\cl H}}
+\def\Q{{\bm{Q}}}
+\def\U{{\bm{U}}}
+\def\V{{\bm{V}}}
+\def\win{\hat{\w}}
+\def\wopt{\w^*}
+\def\matAhat{\hat\mat{A}}
+\def\matA{\mat{A}}
+\def\matB{\mat{B}}
+\def\matC{\mat{C}}
+\def\matD{\mat{D}}
+\def\matE{\mat{E}}
+\def\matG{\mat{G}}
+\def\matH{\mat{H}}
+\def\matI{\mat{I}}
+\def\matF{\mat{F}}
+\def\matM{\mat{M}}
+\def\matP{\mat{P}}
+\def\matQ{\mat{Q}}
+\def\matR{\mat{R}}
+\def\matS{\mat{S}}
+\def\matT{\mat{T}}
+\def\matU{\mat{U}}
+\def\matV{\mat{V}}
+\def\matW{\mat{W}}
+\def\matX{\mat{X}}
+\def\matXopt{\mat{X}_{\mathrm{opt}}}
+\def\matY{\mat{Y}}
+\def\matZ{\mat{Z}}
+\def\matSig{\mat{\Sigma}}
+\def\matTh{\mat{\Theta}}
+\def\matOmega{\mat{\Omega}}
+\def\matPsi{\mat{\Psi}}
+\def\matGam{\mat{\Gamma}}
+\def\boldPi{\boldsymbol{\Pi}}
+\def\w{{\mathbf{w}}}
+\def\ein{{\cl E_{\text{\mathrm{in}}}}}
+\def\eout{{\cl E}}
+\def\scl{{\textsc{l}}}
+\def\scu{{\textsc{u}}}
+\def\phiu{{\overline{\phi}}}
+\def\psiu{{\overline{\psi}}}
+\def\phil{{\underbar{\math{\phi}}}}
+%\DeclareMathSymbol{\Prob}{\mathbin}{AMSb}{"50}
+%\DeclareMathSymbol{\Exp}{\mathbin}{AMSb}{"45}
+\newcommand\remove[1]{}
+
+\def\nnz{{ \mathrm nnz }}

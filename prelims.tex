@@ -1,0 +1,692 @@
+%!TEX root = thesis.tex
+
+\chapter{Preliminaries for the investigation of low-rank approximation algorithms}
+\label{chprelim}
+
+\todo[inline]{Make sure notation in this chapter matches that of the following chapters}
+This chapter consolidates probabilistic and 
+linear algebraic tools used in Chapters~\ref{ch3} and~\ref{ch4}. We also establish 
+two lemmas of independent interest: 
+the first, Lemma~\ref{chprelim:lem:matrix-multiplication}, is an exponential tail bound on 
+the Frobenius-norm error incurred when approximating the product of two 
+matrices using randomized column and row sampling without replacement;
+the second, Lemma~\ref{chprelim:lem:structural-result2}, is a deterministic bound on 
+the forward errors of column-based low-rank approximations.
+
+ \section{ Probabilistic tools}
+
+ In this section, we review several tools that are used to deal with random 
+ matrices and more generally, random processes.
+ 
+\subsection{Concentration of convex functions of Rademacher variables}
+Rademacher random variables take the values $\pm 1$ with equal
+probability. Rademacher vectors are vectors of i.i.d.\ Rademacher random
+variables. Rademacher vectors often play a crucial role in the construction of dimension reduction
+maps, an area where the strong measure concentration properties of Rademacher
+sums are often exploited. The following result states a large-deviation property of  
+convex Lipschitz functions of Rademacher vectors:
+namely, these functions tend to be not much larger than their expectations.
+
+\begin{lemma}[A large deviation result for convex Lipschitz functions of Rademacher 
+random variables {[Corollary 1.3 ff. in~\cite{L96}]} ]
+\label{chprelim:lem:rademacher-concentration}
+ Suppose $f : \R^n \rightarrow \R$ is a convex function that satisfies the Lipschitz 
+ bound
+\[
+ |f(\x) - f(\y)| \leq L \TNorm{\x - \y} \quad \text{for all $\x, \y$.}
+\]
+Let $\boldsymbol{\varepsilon} \in \R^n$ be a Rademacher vector. For all $t \geq 0,$
+\[
+ \Prob{f(\boldsymbol{\varepsilon}) \geq \Expect{f(\boldsymbol{\varepsilon})} + Lt} \leq 
+ \expe^{-t^2/8}.
+\]
+\end{lemma}
+ 
+\subsection[Chernoff bounds for sampling without replacement]{Chernoff bounds for sums of random matrices sampled without replacement}
+ 
+ Classical Chernoff bounds provide tail bounds for sums of nonnegative random
+ variables. Their matrix analogs provide tail bounds on the eigenvalues and singular
+ values of sums of positive-semidefinite random matrices. Matrix Chernoff bounds are particularly useful for
+ analyzing algorithms involving randomized column-sampling. Most matrix
+ Chernoff bounds available in the literature require the summands to be independent.
+ Indeed, the Chernoff bounds developed in Chapter~\ref{ch1} bound the eigenvalues
+ of a sum of independent random Hermitian matrices. However, occasionally one desires
+ Chernoff bounds that do not require the summands to be independent. The following Chernoff 
+ bounds are useful in the case where the summands are drawn
+ without replacement from a set of bounded random matrices. 
+
+ \begin{lemma}[Matrix Chernoff Bounds, Theorem~2.2 in~\cite{Tro11}]
+% see also Theorem~1.1 in~\cite{T10a}
+ \label{chprelim:lem:chernoffworeplacement}
+ Let $\mathcal{X}$ be a finite set of positive-semidefinite matrices with 
+ dimension $k,$ and suppose that
+\[
+ \max_{\matX \in \mathcal{X}} \lambdamax{\matX} \leq B.
+\]
+Sample $\{\matX_1, \ldots, \matX_\ell \}$ uniformly at random from $\mathcal{X}$ 
+without replacement. Compute
+\[
+ \mu_{\mathrm{max}} = \ell \cdot \lambda_1(\E \matX_1) \quad \text{ and } 
+ \quad  \mu_{\text{min}} = \ell \cdot \lambda_k(\E \mat{X}_1).
+\]
+
+Then
+\begin{align*}
+ \Prob{\lambda_1\left(\sum\nolimits_j \matX_j \right) \geq (1+\nu)\mu_{\mathrm{max}} } 
+ &\leq k \cdot \bigg[ \frac{\expe^\nu}{(1+\nu)^{1+ \nu}} \bigg]^%
+ {\mu_{\mathrm{max}}/B} \quad \text{ for $\nu \geq 0,$ and} \\
+ \Prob{\lambda_k\left(\sum\nolimits_j \matX_j\right) \leq (1-\nu) \mu_{\mathrm{min}} }
+ &\leq k \cdot \bigg[ \frac{\expe^{-\nu}}{(1-\nu)^{1-\nu}} \bigg]^%
+ {\mu_{\mathrm{min}}/B} \quad \text{ for $\nu \in [0,1).$ }
+\end{align*}
+
+\end{lemma}
+
+We also use the following standard simplification of the lower Chernoff bound,
+which holds under the setup of Lemma~\ref{chprelim:lem:chernoffworeplacement}:
+\begin{equation}
+\label{chprelim:eqn:lowerchernoff}
+ \Prob{ \lambda_k\left(\sum\nolimits_j \mat{X}_j \right) \leq \varepsilon\mu_{\text{min}}
+} \leq k \cdot \e^{-(1-\varepsilon)^2 \mu_{\text{min}}/(2B)} \quad \text{for }
+\varepsilon \in [0,1].
+\end{equation}
+
+\subsection{Frobenius-norm error bounds for matrix multiplication}
+
+We now establish a tail bound on the Frobenius-norm error of a simple approximate 
+matrix multiplication scheme based upon randomized column and row sampling. 
+This simple approximate multiplication scheme is a staple in
+randomized numerical linear algebra, and variants have been analyzed multiple 
+times~\cite{DK01,DKM06a,Sar06}. The result derived here differs in that it applies to the 
+sampling without replacement model, and it provides bounds on the error that hold 
+with high probability, rather than simply an estimate of the expected error.
+
+% We mention that Lemma 3.2.8 in~\cite{Dri02} gives a
+%similar result for approximate matrix multiplication, which, however gives a bound for the expected value of the error term, while our Lemma~\ref{ch3:lem:mm}
+%gives a comparable bound which holds with high probability. 
+
+\todo[inline]{See Joel's notes on how to remove the factor of 4 from here}
+\begin{lemma}[Matrix Multiplication]
+\label{chprelim:lem:matrix-multiplication}
+Let $\matX \in \R^{m \times n}$ and $\matY \in \R^{n \times p}$. 
+Fix $\ell \leq n$. Select uniformly at random and without replacement $\ell$ columns 
+from $\matX$ and the corresponding rows from $\matY$ and multiply the selected
+columns and rows with $\sqrt{n/\ell}$. Let $\hat{\matX} \in \R^{m \times \ell}$ and
+$\hat{\matY} \in \R^{\ell \times p}$ contain the scaled columns and rows, 
+respectively.
+Choose
+\[
+\sigma^2 \geq \frac{4 n}{\ell} \sum\nolimits_{i=1}^n \|\vec{X}_{(i)}\|_2^2
+\|\vec{Y}^{(i)}\|_2^2 \quad \text{and} 
+\quad B \geq \frac{2 n}{\ell} \max_i \|\vec{X}_{(i)}\|_2 \|\vec{Y}^{(i)}\|_2.
+\]
+Then if $ 0 \leq t \leq \sigma^2/B,$
+\[
+\Prob{\FNorm{\hat{\matX} \hat{\matY} - \matX \matY} \geq t + \sigma } \leq 
+\mathrm{exp}\left( -\frac{t^2}{4\sigma^2}\right).
+\]
+\end{lemma}
+
+To prove Lemma~\ref{chprelim:lem:matrix-multiplication},
+we use the following vector Bernstein inequality for sampling without 
+replacement in Banach spaces; this result follows directly from a similar 
+inequality for sampling with replacement established by Gross in~\cite{Gross11}.
+Again, vector Bernstein inequalities have been derived by multiple authors~\cite{LT91,BLM03,Recht09,T10a,CP11,Gross11};
+the value of this specific result is that it applies to the sampling without
+replacement model.
+
+\todo[inline]{Use a different letter than just primed V for the ones sampled w/ replacement,
+since they have a different distro. Ditto about removing a factor of 4}
+\begin{lemma}
+ \label{chprelim:lem:vector-bernstein}
+  Let $\mathcal{V}$ be a collection of $n$ vectors in a Hilbert space with norm
+  $\VTNorm{\cdot}.$ Choose $\vec{V}_1, \ldots, \vec{V}_\ell$ from $\mathcal{V}$ 
+  uniformly at random \emph{without} replacement. Choose 
+  $\vec{V}_1^\prime, \ldots, \vec{V}_\ell^\prime$ from $\mathcal{V}$ uniformly at
+  random \emph{with} replacement. Let
+\[
+ \mu = \E{\VTNorm{\sum\nolimits_{i=1}^\ell (\vec{V}_i^\prime - \E{\vec{V}_i^\prime})}}
+\]
+and set
+\[
+\sigma^2 \geq 4\ell\E{\VTNormS{\vec{V}_1^\prime}} \quad \text{ and } 
+\quad B \geq 2 \max_{\vec{V} \in \mathcal{V}} \VTNorm{\vec{V}}.
+\]
+If $ 0 \leq t \leq \sigma^2/B,$ then
+\[
+ \Prob{\VTNorm{\sum\nolimits_{i=1}^\ell \vec{V}_i - \ell\E{\vec{V}_1}} \geq 
+ \mu+t} \leq \mathrm{exp}\left( -\frac{t^2}{4 \sigma^2} \right).
+\]
+\end{lemma}
+
+\begin{proof}
+ We proceed by developing a bound on the moment generating function (mgf) of
+\[
+\VTNorm{\sum\nolimits_{i=1}^\ell \vec{V}_i - \ell\E{\vec{V}_1}} - \mu.
+\]
+This mgf is controlled by the mgf of a similar sum where the vectors are sampled with replacement. That is, for $\lambda \geq 0,$
+\begin{equation}
+\label{ch3:eqn:mgfineq}
+ \E{\mathrm{exp}\left(\lambda \cdot \VTNorm{\sum\nolimits_{i=1}^\ell \vec{V}_i - \ell\E{\vec{V}_1}} - \lambda \mu\right)} \leq
+\E{\mathrm{exp}\left(\lambda \cdot \VTNorm{\sum\nolimits_{i=1}^\ell \vec{V}_i^\prime - \ell\E{\vec{V}_1}} - \lambda \mu\right)}.
+\end{equation}
+This follows from a classical observation due to Hoeffding~\cite{Hoe63} 
+that for any convex real-valued function $g,$
+\[
+ \E{g\left( \sum\nolimits_{i=1}^\ell \vec{V}_i \right)}\leq \E{g\left(\sum\nolimits_{i=1}^\ell \vec{V}_i^\prime \right)}.
+\]
+The paper~\cite{GN10} provides an alternate exposition of this fact.
+Specifically, take $g(\vec{V}) = \mathrm{exp}\left(\lambda\VTNorm{\vec{V} 
+- \ell \E{\vec{V}_1}} - \lambda \mu\right)$ to obtain the inequality of mgfs
+asserted in~\eqref{ch3:eqn:mgfineq}.
+
+\todo[inline]{Reference Gross's proof, but reproduce in its entirety.}
+In the proof of Theorem 12 in~\cite{Gross11}, Gross establishes that any 
+random variable $Z$ whose mgf is less than the righthand side of~\eqref{ch3:eqn:mgfineq} 
+satisfies a tail inequality of the form
+\begin{equation}
+\label{ch3:eqn:grosstail}
+ \Prob{ Z \geq \mu + t } \leq \mathrm{exp}\left( -\frac{t^2}{4s^2} \right)
+\end{equation}
+when $t \leq s^2/M,$ where
+\[
+s^2 \geq \sum\nolimits_{i=1}^\ell \E{\VTNorm{\vec{V}_i^\prime - \E{\vec{V}_1^\prime} }^2}
+\]
+and $\VTNorm{\vec{V}_i^\prime - \E{\vec{V}_1^\prime}} \leq M$ almost surely for all $i=1,\ldots,\ell.$
+ To apply this result, note that for all $i=1,\ldots,\ell,$
+ \[
+  \VTNorm{\vec{V}_i^\prime - \E{\vec{V}_1^\prime}} \leq 2 \max_{\vec{V} \in \mathcal{V}} \VTNorm{\vec{V}} = B.
+ \]
+Take $\vec{V}_1^{\prime\prime}$ to be an i.i.d. copy of $\vec{V}_1^\prime$ and observe that, by Jensen's inequality,
+ \begin{align*}
+  \sum\nolimits_{i=1}^\ell \E{\VTNorm{\vec{V}_i^\prime - \E{\vec{V}_1^\prime} }^2} & = \ell \E{\VTNorm{\vec{V}_1^\prime - \E{\vec{V}_1^\prime} }^2} \\
+  & \leq \ell \E{\VTNormS{\vec{V}_1^\prime - \vec{V}_1^{\prime\prime}} } \leq \ell \E{ (\VTNorm{\vec{V}_1^\prime} + \VTNorm{\vec{V}_1^{\prime \prime}})^2} \\
+  & \leq 2 \ell \E{ \VTNormS{\vec{V}_1^\prime} + \VTNormS{\vec{V}_1^{\prime\prime}} } \\
+  & = 4 \ell \E{ \VTNormS{\vec{V}_1^\prime} } \leq \sigma^2.
+ \end{align*}
+The bound given in the statement of Lemma~\ref{chprelim:lem:vector-bernstein} 
+when we take $s^2 = \sigma^2$ and $M = B$ in \eqref{ch3:eqn:grosstail}.
+\end{proof}
+
+With this Bernstein bound in hand, we proceed to the proof of 
+Lemma~\ref{chprelim:lem:matrix-multiplication}. Let 
+$\text{vec} : \R^{m \times n} \rightarrow \R^{mn}$ denote the operation of vectorization,
+which stacks the columns of a matrix $\matA \in \R^{m \times n}$ to form the vector $\text{vec}(\matA).$
+
+\begin{proof}[Proof of Lemma~\ref{chprelim:lem:matrix-multiplication}]
+ Let $\mathcal{V}$ be the collection of vectorized rank-one products of 
+ columns of $\sqrt{n/\ell}\cdot\matX$ and rows of $\sqrt{n/\ell}\cdot\matY.$ That is, take
+\[
+ \mathcal{V} = \bigg\{ \frac{n}{\ell} \text{vec}(\vec{X}_{(i)} \vec{Y}^{(i)}) \bigg\}_{i=1}^n.
+\]
+Sample $\vec{V}_1, \ldots, \vec{V}_\ell$ uniformly at random from $\mathcal{V}$ 
+without replacement, and observe that $\E{\vec{V}_i} = \ell^{-1} \text{vec}(\matX \matY).$
+With this notation, 
+\[
+ \FNorm{\hat{\matX} \hat{\matY} - \matX \matY} \sim \TNormB{\sum\nolimits_{i=1}^\ell (\vec{V}_i - \E{\vec{V}_i})},
+\]
+where $\sim$ refers to identical distributions. Therefore any probabilistic bound developed for the 
+right-hand side quantity holds for the left-hand side quantity. The conclusion of the lemma follows 
+when we apply Lemma~\ref{chprelim:lem:vector-bernstein} to bound the right-hand side quantity.
+
+We calculate the variance-like term in Lemma~\ref{chprelim:lem:vector-bernstein},
+\[
+ 4 \ell \E{\TNormS{\vec{V}_1}} = 4\ell \frac{1}{n} \sum_{i=1}^n \frac{n^2}{\ell^2} 
+ \|\vec{X}_{(i)}\|_2^2 \|\vec{Y}^{(i)}\|_2^2 = 4\frac{n}{\ell} \sum_{i=1}^n 
+ \|\vec{X}_{(i)}\|_2^2 \|\vec{Y}^{(i)}\|_2^2 \leq \sigma^2.
+\]
+
+Now we consider the expectation
+\[
+ \mu  =  \E{\TNormB{\sum\nolimits_{i=1}^\ell (\vec{V}_i^\prime - \E{\vec{V}_i^\prime})}}.
+\]
+In doing so, we will use the notation $\condE{A,B,\ldots}{C}$ to denote the conditional 
+expectation of a random variable $C$ with respect to the random variables $A,B,\ldots.$
+Recall that a Rademacher vector is a random vector whose entries are independent and 
+take the values $\pm 1$ with equal probability. Let $\boldsymbol{\varepsilon}$ be a Rademacher 
+vector of length $\ell$ and sample $\vec{V}_1^\prime, \ldots, \vec{V}_\ell^\prime$ and 
+$\vec{V}_1^{\prime\prime}, \ldots, \vec{V}_\ell^{\prime\prime}$ uniformly at random 
+from $\mathcal{V}$ with replacement. Now $\mu$ can be bounded as follows:
+\begin{eqnarray*}
+ \mu  & =  & \E{\TNormB{\sum\nolimits_{i=1}^\ell (\vec{V}_i^\prime - \E{\vec{V}_i^\prime})}} \\
+      &\leq& \condE{\{\vec{V}_i^\prime\}, \{\vec{V}_i^{\prime\prime}\}}{\TNormB{\sum\nolimits_{i=1}^\ell (\vec{V}_i^\prime - \vec{V}_i^{\prime\prime})}} \\
+      & =  & \condE{\{\vec{V}_i^\prime\}, \{\vec{V}_i^{\prime\prime}\}, \boldsymbol{\varepsilon}}{\TNormB{\sum\nolimits_{i=1}^\ell \varepsilon_i (\vec{V}_i^\prime - \vec{V}_i^{\prime\prime})}}\\
+      &\leq& 2 \condE{\{\vec{V}_i^\prime\}, \boldsymbol{\varepsilon}}{\TNormB{\sum\nolimits_{i=1}^\ell \varepsilon_i \vec{V}_i^\prime}} \\
+      &\leq& 2 \sqrt{ \condE{\{\vec{V}_i^\prime\}, \boldsymbol{\varepsilon}}{\TNormBS{\sum\nolimits_{i=1}^\ell \varepsilon_i \vec{V}_i^\prime}} }\\
+      & = & 2 \sqrt{ \condE{\{\vec{V}_i^\prime\}}{\condE{\boldsymbol{\varepsilon}}{\sum\nolimits_{i,j=1}^\ell \varepsilon_i \varepsilon_j {\vec{V}_i^\prime}\transp \vec{V}_j^\prime} }}\\
+      &=& 2 \sqrt{\E{ \sum\nolimits_{i=1}^\ell \TNormS{\vec{V}_i^\prime}} }.
+\end{eqnarray*}
+The first inequality is Jensen's, and the following equality holds 
+because the components of the sequence $\{\vec{V}_i^\prime - \vec{V}_i^{\prime\prime}\}$ 
+are symmetric and independent. The next two manipulations are the triangle 
+inequality and Jensen's inequality. This stage of the estimate is concluded 
+by conditioning and using the orthogonality of the Rademacher variables. Next, 
+the triangle inequality and the fact that 
+$\E{\TNormS{\vec{V}_1^\prime}} = \E{\TNormS{\vec{V}_1}}$ 
+allow us to further simplify the estimate of $\mu:$
+\[
+ \mu \leq 2 \sqrt{\E{ \sum\nolimits_{i=1}^\ell \TNormS{\vec{V}_i^\prime}} } 
+ = 2 \sqrt{\ell \E{\TNormS{\vec{V}_1}}} \leq \sigma.
+\]
+We also calculate the quantity
+\[
+2 \max_{\vec{V} \in \mathcal{V}} \TNorm{\vec{V}} = 
+ \frac{2n}{\ell} \max_i \|\vec{X}_{(i)}\|_2\|\vec{Y}^{(i)}\|_2 \leq B.
+\]
+The tail bound given in the statement of the lemma follows from applying Lemma~\ref{chprelim:lem:vector-bernstein} 
+with our estimates for $B$, $\sigma^2,$ and $\mu.$
+\end{proof}
+
+\section{Linear Algebra notation and results}
+
+In subsequent chapters, we use the following partitioned compact SVD to state results for 
+rectangular matrices $\matA$ with $\rank(\matA) = \rho:$
+\vspace{-.19in}
+\begin{equation}
+\mat{A} = \mat{U} \mat{\Sigma} \mat{V}\transp 
+= \bordermatrix[{[}{]}]{%
+&^k \vspace{-0.75ex} & \!\!^{\rho-k}  \hspace{1ex}\\
+& \vspace{0.25ex} \mat{U}_1 \hspace{-2ex} & \mat{U}_2 
+}
+\bordermatrix[{[}{]}]{%
+& \vspace{-0.75ex} ^k &\!\!^{\rho-k} \hspace{1ex}\\
+& \mat{\Sigma}_1 & \\
+& \vspace{0.5ex} & \mat{\Sigma}_2 
+}
+\bordermatrix*[{[}{]}]{%
+\mat{V}_1\transp \!\! & \\
+\vspace{-1ex} \mat{V}_2\transp \!\! & \\
+ \vspace{-1ex} &
+}.
+\label{chintro:eqn:svdpartition}
+\end{equation}
+%
+Here, $\mat{\Sigma}_1$ contains the $k$ largest singular values of $\matA$ and 
+the columns of $\mat{U}_1$ and $\mat{V}_1$ respectively span top $k$-dimensional 
+left and right singular spaces of $\mat{A}.$ The matrix $\matA_k = \matU_1 \matSig_1 \matV_1\transp$
+is the optimal rank-$k$ approximation to $\matA,$ and $\matA_{\rho - k} = \matA - \matA_k = \matU_2 \matSig_2 \matV_2\transp.$
+The Moore-Penrose pseudoinverse of $\matA$ is denoted by $\matA^\pinv.$
+
+When $\mat{A}$ is a positive-semidefinite matrix, 
+$\matU = \matV$ and~\eqref{chintro:eqn:svdpartition}
+becomes the following partitioned eigenvalue decomposition:
+\begin{equation}
+\mat{A} = \mat{U} \mat{\Sigma} \mat{U}\transp = \bordermatrix[{[}{]}]{%
+&^k \vspace{-0.75ex} & \!\!^{\rho-k}  \hspace{1ex}\\
+& \vspace{0.25ex} \mat{U}_1 \hspace{-2ex} & \mat{U}_2 
+}
+\bordermatrix[{[}{]}]{%
+& \vspace{-0.75ex} ^k &\!\!^{\rho-k} \hspace{1ex}\\
+& \mat{\Sigma}_1 & \\
+& \vspace{0.5ex} & \mat{\Sigma}_2 
+}
+\bordermatrix*[{[}{]}]{%
+\mat{U}_1\transp \!\! & \\
+\vspace{-1ex} \mat{U}_2\transp \!\! & \\
+ \vspace{-1ex} &
+}.
+\label{chintro:eqn:eigenpartition}
+\end{equation}
+The eigenvalues of an $n \times n$ symmetric matrix $\matA$ are 
+ordered $\lambda_1(\matA) \geq \cdots \geq \lambda_n(\matA).$
+
+ The orthoprojector onto the column space of a matrix $\mat{A}$ is written
+$\mat{P}_{\mat{A}}$ and satisfies
+\[
+\mat{P}_{\mat{A}} = \mat{A}\mat{A}^\pinv = \mat{A} (\mat{A}\transp
+\mat{A})^\pinv \mat{A}\transp.
+\]
+
+ Let $\mathcal{S}$ be a
+$k$-dimensional subspace of $\R^n$ and $\mat{P}_{\mathcal{S}}$ denote the
+projection onto $\mathcal{S}.$ Then the \emph{coherence} of $\mathcal{S}$ is
+\[
+ \mu(\mathcal{S}) = \frac{n}{k} \max\nolimits_i (\mat{P}_{\mathcal{S}})_{ii}.
+\]
+The coherence of a matrix $\mat{U} \in \R^{n\times k}$ with orthonormal columns
+is the coherence of the subspace $\mathcal{S}$ which it spans:
+\[
+\mu(\mat{U}) := \mu(\mathcal{S}) = \frac{n}{k} \max\nolimits_i
+(\mat{P}_{\mathcal{S}})_{ii} = \frac{n}{k} \max\nolimits_i
+(\mat{U}\mat{U}\transp)_{ii}.
+\]
+
+The $k$th column of the matrix $\mat{A}$ is denoted by $\matA_{(k)};$ 
+the $j$th row is denoted by $\matA^{(j)}.$ The vector $\bm{e}_i$ is the $i$th 
+element of the standard Euclidean basis (whose dimensionality 
+ will be clear from the context).
+ 
+ We often compare SPSD matrices using the semidefinite ordering. 
+ In this ordering, $\mat{A}$ is greater than or equal to $\mat{B}$, written 
+ $\mat{A} \succeq \mat{B}$ or $\mat{B} \preceq \mat{A},$ when 
+ $\mat{A} - \mat{B}$ is positive semidefinite. Each SPSD
+ matrix $\mat{A}$ has a unique square root $\mat{A}^{1/2}$ that is also SPSD, 
+ has the same eigenspaces as $\mat{A},$ and satisfies 
+ $\mat{A} = \big(\mat{A}^{1/2}\big)^2.$ The eigenvalues of an SPSD matrix $\mat{A}$ are arranged in weakly decreasing order: 
+ $\lambdamax{\mat{A}} = \lambda_1(\mat{A}) \geq \lambda_2(\mat{A}) \geq \cdots \geq \lambda_n(\mat{A}) = \lambdamin{\mat{A}}.$ 
+ Likewise, the singular values of a rectangular matrix $\mat{A}$ with rank $\rho$ are ordered 
+ $\s_{\max}(\mat{A}) = \s_1(\mat{A}) \geq \s_2(\mat{A}) \geq \cdots \geq \s_\rho(\mat{A}) = \sigma_{\min}(\matA).$ 
+ The spectral norm of a matrix $\mat{B}$ is written
+ $\snorm{\mat{B}};$ its Frobenius norm and trace are written $\fnorm{\matB}$ and $\tracenorm{\matB},$ respectively. 
+ The notation $\XNorm{\cdot}$ indicates that an expression holds for both $\xi = 2$ and $\xi = \mathrm{F}$.
+ 
+ 
+\subsection{ Column-based low-rank approximation}
+
+The remainder of this thesis concerns low-rank matrix approximation 
+algorithms: Chapter~\ref{ch3} provides bounds on the approximation errors 
+of low-rank approximations that are formed using fast orthonormal
+transformations, and Chapter~\ref{ch4} provides bounds on the approximation
+errors of a class of low-rank approximations to SPSD matrices.
+
+Both of these low-rank approximation schemes are amenable to interpretation
+as schemes wherein a matrix is projected onto a subspace spanned by some 
+linear combination of its columns. The problem of providing a general 
+framework for studying the error of these projection schemes is well 
+studied~\cite{BMD09a,HMT11,BDM11a}. The authors of these works have provided
+a set of so-called \emph{structural} results: deterministic bounds on the
+spectral and Frobenius-norm approximation errors incurred by these projection
+schemes. Structural results allow
+us to relate the errors of low-rank approximations formed using projection
+schemes to the optimal errors $\XNorm{\matA - \matA_k}$ for $\xi=2,\mathrm{F}.$
+
+Before stating the specific structural results that are used in the sequel,
+we review the necessary background material on low-rank matrix approximations 
+that are restricted to lie within a particular subspace. 
+
+
+\subsubsection{Matrix Pythagoras and generalized least-squares regression}
+Lemma~\ref{intro:lem:pyth} is the analog of Pythagoras' theorem in the matrix 
+setting. A proof of this lemma can be found in~\cite{BDM11a}. 
+Lemma~\ref{intro:lem:genreg} is an immediate corollary that generalizes the 
+Eckart--Young theorem.
+\begin{lemma}\label{intro:lem:pyth}
+If $\matX\matY\transp=\bm{0}$ or $\matX\transp\matY=\bm{0},$ then 
+%
+\[
+\FNorm{\matX+\matY}^2 = \FNorm{\matX}^2+\FNorm{\matY}^2
+\]
+and
+\[
+\max\{\TNormS{\matX}, \TNormS{\matY}\} \leq \TNormS{\matX + \matY} \leq 
+\TNormS{\matX} + \TNormS{\matY}.
+\]
+\end{lemma}
+
+\begin{lemma}\label{intro:lem:genreg}
+Given $\matA \in \R^{m \times n}$ and $\matC \in \R^{m \times \ell}$, for all 
+$\matX \in\R^{\ell \times n}$ 
+\[
+\XNormS{ \matA- \matP_{\matC} \matA} \le \XNormS{ \matA - \matC \matX }
+\]
+for both $\xi = 2$ and $\xi = \mathrm{F}$.
+\end{lemma}
+\begin{proof}
+Write
+\[
+\matA-\matC\matX=(\matI-\matP_{\matC})\matA + (\matP_{\matC} \matA- \matC\matX)
+\]
+and observe that 
+\[
+ ((\matI-\matP_{\matC})\matA)\transp (\matP_{\matC} \matA- \matC\matX) = 
+ \bm{0},
+\]
+so by Lemma~\ref{intro:lem:pyth},
+\[ 
+ \XNormS{\matA-\matC\matX} \ge
+\XNormS{(\matI-\matP_\matC)\matA}.
+\]
+\end{proof}
+
+\subsubsection{Low-rank approximations restricted to subspaces}
+
+Given $\matA \in \mathbb{R}^{m \times n}$;
+a target rank $k < n$; another matrix $\matY \in \mathbb{R}^{m \times \ell},$ 
+where $\ell > k$; and a choice of norm $\xi$ ($\xi=2$ or $\xi = \mathrm{F}$), 
+we use the notation $\boldPi_{\matY,k}^\xi(\matA)$ to refer to the matrix
+that lies in the column span of $\matY,$ has rank $k$ or less, and minimizes the $\xi$-norm error in approximating $\matA.$
+More concisely, $\boldPi_{\matY,k}^\xi(\matA) = \matY\matX^\xi$, where
+%
+$$
+\matX^\xi = \argmin_{\matX \in {\R}^{\ell \times n}:\rank(\matX)\leq k}\XNormS{\matA-
+\matY\matX}.
+$$
+%
+The approximation $\boldPi_{\matY,k}^{\mathrm{F}}(\matA)$ can be computed using
+the following three-step procedure:
+%
+\begin{center}
+\begin{algorithmic}[1]
+%
+\State Orthonormalize the columns of $\matY$ to construct a matrix 
+ $\matQ \in \R^{m \times \ell}$. % This can be done in $\asymO{m r^2}$ time with a
+ % QR decomposition.
+%
+\State Compute $\matXopt = \argmin_{\matX \in \R^{\ell \times n},\,\, \rank(\matX) \le k}\FNorm{ \matQ\transp \matA - \matX }.$ 
+% This can be done in $\asymO{mnr+ nr^2}$  time with an SVD.
+
+\State Compute and return %$\Pi_{\matC,k}^{\xi}(\matA) = % Christos
+$\boldPi_{\matY, k}^{\mathrm{F}}(\matA) = \matQ\matXopt \in \mathbb{R}^{m \times n}.$ 
+% This can be done in $O(mnr)$ time.
+%
+\end{algorithmic}
+\end{center}
+%
+There does not seem to be a similarly efficient algorithm for computing 
+$\boldPi_{\matY,k}^2(\matA).$ 
+
+The following result, which appeared as Lemma~18
+in~\cite{BDM11a}, both verifies the claim that this algorithm computes 
+$\boldPi_{\matY,k}^{\mathrm{F}}(\matA)$ and shows that 
+ $\boldPi_{\matY,k}^{\mathrm{F}}(\matA)$ is a constant factor approximation to
+ $\boldPi_{\matY,k}^{2}(\matA)$.
+%
+\begin{lemma}\label{chprelim:lem:bestF}[Lemma 18 in~\cite{BDM11a}]
+Given $\matA \in {\R}^{m \times n}$, $\matY\in\R^{m\times \ell}$,
+and an integer $k \le \ell$,  the matrix
+$\matQ\matXopt \in \mathbb{R}^{m \times n}$
+ described above satisfies $\boldPi_{\matY,k}^{\mathrm{F}}(\matA) = \matQ\matXopt,$
+ can be computed in
+$\const{O}(mn\ell + (m+n)\ell^2)$ time, and satisfies
+%
+\[
+\norm{\matA-\boldsymbol{\Pi}_{\mat{Y},k}^{\mathrm{F}}(\matA)}_2^2 \leq 2\TNormS{\matA-\boldPi_{\matY,k}^{2}(\matA)}.
+\]
+%
+\end{lemma}
+
+\subsection{Structural results for low-rank approximation}
+
+The following result, which appears as 
+Lemma 7 in~\cite{BMD09a}, provides
+an upper bound on the residual error of the low-rank 
+matrix approximation obtained via projections onto subspaces. The paper~\cite{HMT11}
+also supplies an equivalent result. 
+
+\begin{lemma}
+\label{chprelim:lem:structural-result}[Lemma 7 in~\cite{BMD09a}]
+Let $\matA \in \R^{m \times n}$ have rank $\rho.$ Fix $k$ satisfying $0 \leq k \leq \rho$.
+Given a matrix $\matS \in \R^{n \times \ell}$, with $\ell \ge k$, 
+construct $\matY = \matA \matS.$ If $\matV_1 \transp \matS$ has full 
+row-rank, then,
+for $\xi=2, \mathrm{F}$,
+\begin{equation}
+\label{ch3:eqn:tropp-structural-result}
+\XNormS{\matA - \matP_\matY \matA}
+\leq
+\XNormS{\matA -  \boldPi_{\matY,k}^{\xi}(\matA) }
+\leq
+\XNormS{ \matA - \matA_k } + 
+\XNormS{\matSig_2 \matV_2 \transp \matS 
+( \matV_1 \transp \matS)^\pinv }.
+\end{equation}
+\end{lemma}
+
+% We also make use of another structural result, Theorem 9.1 in~\cite{HMT11},
+% which is very similar to Lemma~\ref{chprelim:lem:structural-result}. A proof
+% is provided for this structural result because this proof forms the basis of the 
+% new structural results provided in Chapter~\ref{ch4}.
+
+In addition to this bound on the residual error, we use the following novel 
+structural bound on the forward errors of low-rank approximants.
+
+\begin{lemma}
+\label{chprelim:lem:structural-result2}
+Let $\matA \in \R^{m \times n}$ have rank $\rho.$ Fix $k$ satisfying $0 \leq k \leq \rho$.
+Given a matrix $\matS \in \R^{n \times \ell}$, where $\ell \ge k$, construct $\matY = \matA \matS.$
+%Furthermore, let $\matQ \in \R^{m \times r}$ be an orthonormal basis for the column space of $\matY$
+%and let $\tilde{\matA}_k \in \R^{m \times n}$ be $\tilde{\matA}_k =  \matY \matX_{opt}$ with
+%$\matX_{opt} = \argmin_{\matX \in \R^{r \times n},\,\, \rank(\matX) \le k}\FNorm{ \matQ\transp \matA - \matX }.$
+If $\matV_1 \transp \matS$ has full row-rank, then,
+for $\xi=2, \mathrm{F}$,
+\begin{equation}
+\label{ch3:eqn:tropp-structural-result2a}
+\XNormS{\matA_k - \matP_\matY \matA} \leq  \XNormS{\matA - \matA_k} +
+\XNormS{\matSig_2 \matV_2 \transp \matS ( \matV_1 \transp \matS)^\pinv }.
+\end{equation}
+%Furthermore, let $\matQ \in \R^{m \times r}$ be an orthonormal basis for the column space of $\matY$
+%and
+%let $\tilde{\matA}_k \in \R^{m \times n}$ be $\tilde{\matA}_k =  \matQ \matX_{opt}$ with
+%$\matX_{opt} = \argmin_{\matX \in \R^{r \times n},\,\, \rank(\matX) \le k}\FNorm{ \matQ\transp \matA - \matX }.$
+%If $\matV_k \transp \matOmega$ has full row rank and $\matA \matOmega$ has full column rank,
+%and
+%\begin{equation}
+%\label{ch3:eqn:tropp-structural-result2b}
+%\XNormS{\matA_k -   \Pi_{\matY,k}^{\xi}(\matA) } \leq  4 \cdot \XNormS{\matA - \matA_k} +
+%2 \cdot \XNormS{\matSig_{\rho - k} \matV_{\rho-k} \transp \matOmega \pinv{\left( \matV_k \transp \matOmega \right)} }.
+%\end{equation}
+\end{lemma}
+\begin{proof}
+%We first prove Eqn.~\ref{ch3:eqn:tropp-structural-result2a}.
+Observe that 
+\[
+ (\matA_k  - \matP_\matY \matA_k)\transp (\matP_\matY \matA_{\rho-k}) = \bm{0},
+\]
+so Lemma~\ref{intro:lem:pyth} implies that 
+\[
+\XNormS{\matA_k - \matP_\matY \matA} = 
+\XNormS{\matA_k  - \matP_{\matY} \matA_k -\matP_\matY \matA_{\rho-k} }
+\le \XNormS{\matA_k - \matP_{\matY} \matA_k} +  \XNormS{ \matA_{\rho-k} }.
+\]
+Applying Lemma~\ref{intro:lem:genreg}
+with $\matX = (\matV_1\transp \matS)^\pinv \matV_1\transp$, we see that
+\begin{align*}
+\XNormS{\matA_k - \matP_\matY \matA} & \le 
+\XNormS{\matA_k - \matY (\matV_1\transp \matS)^\pinv \matV_1\transp }
+ +  \XNormS{ \matA_{\rho-k} } \\
+ & = \XNormS{\matA_k - \matA_k \matS 
+     (\matV_1\transp \matS)^\pinv \matV_1\transp   + 
+     \matA_{\rho-k}\matS (\matV_1\transp \matS)^\pinv \matV_1\transp}
+     +   \XNormS{ \matA_{\rho-k} } \\
+ & = \XNormS{\matA_k - \matU_1 \matSig_1 \matV_1\transp \matS 
+     (\matV_1\transp \matS)^\pinv \matV_1\transp   + 
+     \matA_{\rho-k}\matS (\matV_1\transp \matS)^\pinv \matV_1\transp}
+     +   \XNormS{ \matA_{\rho-k} }.
+\end{align*}
+Since $\matV_1\transp\matS$ has full row rank, 
+$(\matV_1\transp \matS) (\matV_1\transp \matS)^\pinv = \matI_{k}.$ 
+Recall that $\matA_k = \matU_1 \matSig_1 \matV_1\transp$ and 
+$\matA_{\rho -k} = \matU_2 \matSig_2 \matV_2\transp.$ 
+Consequently, the above inequality reduces neatly to the desired
+inequality
+\begin{align*}
+ \XNormS{\matA_k - \matP_\matY \matA} & \le 
+ \XNormS{\matA_k - \matU_1 \matSig_1 \matV_1\transp   + 
+     \matA_{\rho-k}\matS (\matV_1\transp \matS)^\pinv \matV_1\transp}
+     +   \XNormS{ \matA_{\rho-k} } \\
+     & =
+ \XNormS{\matA_{\rho-k}\matS (\matV_1\transp \matS)^\pinv \matV_1\transp}
+     +   \XNormS{ \matA_{\rho-k}} \\
+     & = \XNormS{\matA - \matA_k} + 
+      \XNormS{\matSig_2 \matV_2\transp \matS
+      (\matV_1\transp \matS)^\pinv}.
+\end{align*}
+\end{proof}
+
+\subsubsection{A geometric interpretation of the sampling interaction matrix}
+Let $\matOmega_1 = \matV_1\transp \matS$ and $\matOmega_2 = \matV_2\transp \matS$
+denote the interaction of the sampling matrix $\matS$ with the top and bottom
+right-singular spaces of $\matA.$ It is evident from Lemmas~\ref{chprelim:lem:structural-result}
+and~\ref{chprelim:lem:structural-result2} that the quality of the low-rank approximations
+depend upon the norm of the \emph{sampling interaction matrix}
+\[
+ \matV_2\transp \matS (\matV_1\transp \matS)^\pinv = \matOmega_2 \matOmega_1^\pinv.
+\]
+The smaller the spectral norm of the 
+$\matOmega_2 \matOmega_1^\pinv$ the more effective 
+$\matS$ is as a sampling matrix. 
+To give the sampling interaction matrix a geometric interpretation,
+we first recall the definition of the sine between the range spaces
+of two matrices $\matM_1$ and $\matM_2:$
+\[
+ \sin^2(\matM_1, \matM_2) = \|(\matI - \matP_{\matM_1}) \matP_{\matM_2}\|_2.
+\]
+Note that this quantity is \emph{not} symmetric: it measures how well the 
+range of $\matM_1$ captures that of $\matM_2$~\cite[Chapter 12]{GL96}.
+
+\begin{lemma}
+ Fix $\matA \in \R^{m \times n},$ a target rank $k$, and $\matS \in \R^{n \times \ell}$ where $\ell > k.$
+ Assume $\matS$ has orthonormal columns. Define
+ \[
+  \matOmega_1 = \matV_1\transp \matS \quad \text{ and } \quad \matOmega_2 = \matV_2\transp \matS.
+ \]
+Then, if $\matOmega_1$ has full row-rank,
+ \[
+  \|\matOmega_2 \matOmega_1^\pinv\|_2 = \tan^2(\matS, \matV_1).
+ \]
+\end{lemma}
+
+\begin{proof}
+Since $\matV_1$ and $\matS$
+have orthonormal columns, we see that
+\begin{align*}
+ \sin^2(\matS, \matV_1) & = 
+ \TNormS{(\matI - \matS \matS\transp) \matV_1 \matV_1\transp} \\
+ & = \TNorm{\matV_1\transp (\matI - \matS \matS\transp) \matV_1} \\
+ & = \TNorm{\matI - \matV_1\transp \matS \matS\transp \matV_1} \\
+ & = 1 - \lambda_k(\matV_1\transp \matS \matS\transp \matV_1) \\
+ & = 1 - \|\matOmega_1^\pinv\|^{-2}.
+\end{align*}
+The second to last equality holds because $\matV_1\transp \matS$ has $k$ 
+rows and we assumed it has full row-rank. Accordingly,
+\[
+ \tan^2(\matS, \matV_1) = 
+  \frac{\sin^2(\matS, \matV_1)}{1 - \sin^2(\matS, \matV_1)} 
+  = \|\matOmega_1^\pinv\|_2^2 - 1.
+\]
+Now observe that 
+\begin{align*}
+\|\matOmega_2 \matOmega_1^\pinv\|_2^2 & = 
+\TNorm{(\matS\transp \matV_1)^\pinv 
+       \matS\transp \matV_2 \matV_2\transp \matS
+       (\matV_1\transp \matS)^\pinv} \\
+& = \TNorm{(\matS\transp \matV_1)^\pinv 
+       (\matI - \matS\transp \matV_1 \matV_1\transp \matS)
+       (\matV_1\transp \matS)^\pinv} \\
+& = \TNormS{(\matS\transp \matV_1)^\dagger} - 1 \\
+& = \tan^2(\matS, \matV_1).
+\end{align*}
+The second to last equality holds because of the fact that, for any matrix $\matM,$
+\[
+ \TNorm{\matM^\pinv( \matI - \matM \matM\transp) (\matM\transp)^\pinv} =
+ \TNormS{\matM^\pinv} - 1;
+\]
+this identity can be established with a routine SVD argument.
+\end{proof}
+
+Thus, when $\matS$ has orthonormal columns and $\matV_1\transp \matS$ has full
+row-rank, $\|\matOmega_2 \matOmega_1^\pinv\|_2$ is the tangent of the
+largest angle between the range of $\matS$ and the top right singular space spanned by 
+$\matV_1.$ If $\matV_1\transp \matS$ does not have full row-rank, then our derivation
+above shows that $\sin^2(\matS, \matV_1) = 1,$ meaning that there is a vector
+in the eigenspace spanned by $\matV_1$ which has no component in the space
+spanned by the sketching matrix $\matS.$ 
+
+We note that $\tan(\matS, \matV_1)$ also arises in the classical 
+bounds on the convergence of the orthogonal iteration algorithm for approximating
+the top $k$-dimensional singular spaces of a matrix (see, e.g.~\cite[Theorem 8.2.2]{GL96}).
+
+%The Frobenius norm of the interaction matrix can be given a similar geometric interpretation.
+
+
+

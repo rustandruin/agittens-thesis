@@ -1,0 +1,17 @@
+*~
+*.fdb_latexmk
+*.sublime*
+*.toc
+*.out
+*.bak
+*.aux
+*.log
+*.bbl
+*.blg
+*.lot
+*.backup
+*.nav
+*.snm
+*.vrb
+*.synctex*
+

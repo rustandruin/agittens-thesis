@@ -1,0 +1,641 @@
+%!TEX root = thesis.tex
+
+\chapter{Introduction and contributions}
+\label{chintro}
+
+Massive datasets are common: among other places, they arise in data-analysis and machine learning
+applications. These datasets are often represented as matrices, so the fundamental tools of 
+linear algebra are indispensable in their analysis. For instance, 
+modeling and data analysis methods based on low-rank approximation have become popular 
+because they capture the low-dimensional structure implicit in massive
+high-dimensional modern datasets. Low-rank approximations are also used for
+their noise-elimination and regularization properties~\cite{H90}. Among many
+applications,  we mention PCA~\cite{HTF08}, multidimensional scaling~\cite{CC00},
+collaborative filtering~\cite{SAJ10}, manifold learning~\cite{HLMS04}, and
+latent semantic indexing~\cite{DDFLH90}. 
+
+The truncated singular value decomposition (SVD) and the rank-revealing QR decomposition
+are classical decompositions used to construct low-rank approximants. However, the construction
+of both of these decompositions costs $\mathrm{O}(n^\omega)$ operations for an
+$n \times n$ matrix~\cite{CH92} (where $\omega$ is the exponent for matrix multiplication). For small $k$ and
+large $n$, Krylov space methods can potentially provide truncated SVDs in much
+less time. In practice, the number of operations required varies considerably
+depending upon the specifics of the method and the spectral properties of the
+matrix, but since one must perform at least $k$ dense matrix--vector multiplies 
+(assuming the matrix is unstructured), computing the rank-$k$ truncated SVD 
+using a Krylov method requires at least
+$\Omega(kn^2)$ operations. Further, iterative schemes like Krylov methods require 
+multiple passes over the matrix, which may incur high communication costs if 
+the matrix is stored in a distributed fashion, or if the data has to percolate
+through a hierarchical memory architecture~\cite{CW09}.
+
+Much interest has been expressed in finding $\const{o}(kn^2)$
+low-rank approximation schemes that offer approximation guarantees comparable with those of
+the truncated SVD.  \emph{Randomized numerical linear algebra} (RNLA) refers to a field of research
+that arose in the early 2000s at the intersection
+of several research communities, including the theoretical computer science and numerical
+linear algebra communities, in response to the desire for fast, efficient algorithms for
+manipulating large matrices. RNLA algorithms for matrix approximation focus on reducing the number of 
+arithmetic operations and the communications costs of algorithms
+by judiciously exploiting randomness.
+Typically, these algorithms take one of two approaches. The sampling approach
+advocates using information obtained by randomly sampling the columns, rows, or 
+entries of the matrix to form an approximation to the matrix. 
+The random projection approach randomly mixes the entries of the matrix before employing
+the sampling approach. The analysis of both classes of algorithms requires the use of 
+tools from the nonasymptotic theory of random
+matrices.
+
+This thesis contributes to both approaches to forming randomized matrix approximants, and it extends the toolset
+available to researchers working in the field of RNLA. 
+\begin{itemize}
+ \item Chapter~\ref{ch1} builds upon the matrix
+Laplace transform originated by Ahlswede and Winter to provide eigenvalue analogs of 
+classical exponential tail bounds for \emph{all} eigenvalues of a sum of random Hermitian matrices.
+Such sums arise often in the analysis of RNLA algorithms.
+ \item Chapter~\ref{ch2} develops
+bounds on the norms of random matrices with independent mean-zero entries, and it applies these bounds
+to investigate the performance of randomized entry-wise sparsification algorithms.
+ \item Chapter~\ref{ch3} provides guarantees on the quality of low-rank approximations generated using
+a class of random projections that exploit fast unitary transformations.
+ \item Chapter~\ref{ch4} concludes by providing a framework for the analysis of a diverse class of low-rank approximations
+to positive-semidefinite matrices, as well as empirical evidence of the efficacy of these
+approximations over a wide range of matrices. The class of approximations considered includes both
+sampling-based approximations as well as projection-based approximations.
+\end{itemize}
+ 
+In the remainder of this introductory chapter, we survey the sampling and projection-based
+approaches to randomized matrix approximation and the tools
+currently available to researchers for the interrogation of the properties of random matrices. We conclude
+with an overview of the contributions of this thesis.
+
+\section{The sampling approach to matrix approximation}
+
+Sparse approximants are of interest because they be used in lieu of the original matrix to reduce 
+the cost of calculations. Randomized sparsified approximations to matrices have found applications in
+approximate eigenvector computations \cite{AM01,AHK06,AM07} and semidefinite optimization
+algorithms \cite{AHK05,dAsp07}.
+
+The first randomized element-wise matrix sparsification algorithms are due to 
+Achlioptas and McSherry~\cite{AM01,AM07}, who considered schemes 
+in which a matrix is replaced with a randomized approximant 
+that has far fewer nonzero entries.
+Their motivation for considering randomized sparsification
+was the desire to use the fast algorithms available for computing the SVDs of large sparse matrices to 
+approximate the SVDs of large dense matrices. In the same work, 
+they presented a scheme that randomly quantizes the entries of the 
+matrix to ${\pm \max_{ij} |A_{ij}|}.$ Such quantization schemes 
+are of interest because they reduce the cost of storing and working with the matrix. 
+Note that this quantization scheme requires two passes over the matrix: one to compute $b,$ then another to quantize.
+The bounds given in~\cite{AM07} for both schemes guarantee that the spectral norm error of the 
+approximations to a matrix $\matA \in \R^{m \times n}$ remain on the order of $\sqrt{\max\{m,n\}} \max_{ij} |A_{ij}|$ with high
+probability. If each entry in the matrix is replaced by zero with probability $1-p,$ the expected
+number of nonzeros in the approximant is shown to be at most $p \|\matA\|_{\mathrm{F}}^2/\max_{ij} |A_{ij}|^2 + 4096m\log^4(n).$
+These bounds are quite weak: the algorithms perform much better on average.
+
+Arora et al. presented an alternative quantization 
+and sparsification scheme in~\cite{AHK06} that has the 
+advantage of requiring only one pass over the input matrix. 
+The schemes of both Arora et. al and Achlioptas and McSherry involve entrywise calculations on the 
+matrix being approximated, and have the property that the entries 
+in the random approximant are independent of each other.
+Succeeding works on entry-wise matrix sparsification include%
+~\cite{DNT10, DZ11, AKL13}; the algorithms given in these works also produce approximants 
+with independent entries. The sharpest available bound on randomized element-wise
+sparsification is satisfied by the algorithm given in~\cite{DZ11}: given an
+accuracy parameter $\epsilon > 0,$ this algorithm produces an approximant that satisfies
+$\|\matA - \tilde{\matA}\|_2 \leq \epsilon$ with high probability
+and has at most $28 \epsilon^2 n \log(\sqrt{2n}) \|\matA\|_{\mathrm{F}}^2$ nonzero entries;
+the approximant can be calculated in one pass. The paper~\cite{DNT10} goes beyond matrix sparsification, addressing 
+randomized element-wise tensor sparsification.
+
+% Beginning with the work of Karger, strong connections have been made between the problems of matrix
+% sparsification and graph sparsification. This interconnection has led to the development of
+% fast solvers for symmetric diagonally dominant linear systems, originating in the work of
+% Spielman et. al. The sharpest results in this direction as Orecchia, blah blah. 
+
+The natural next step after entry-wise sampling is the sampling of entire columns and rows.
+An influential portion of the first wave of RNLA algorithms employed such a sampling approach,
+in the form of Monte Carlo approximation algorithms.
+In~\cite{FKV98}, Frieze, Kannan, and Vempala introduce the first algorithm of this type
+for calculating approximate SVDs of large matrices. They propose 
+judiciously sampling a submatrix from $\matA$ and using the SVD of this 
+submatrix to find an approximation of the top singular spaces of $\matA.$ 
+The projection of $\matA$ onto this subspace is then used as the low-rank
+approximation. This algorithm of course requires two passes over the matrix.
+The original idea in~\cite{FKV98} was refined in
+a series of papers providing increasingly strong guarantees on the quality of the 
+approximation~\cite{DK01,DK03,FKV04,DKM06a,DKM06b}. 
+
+Rudelson and Vershynin take a different approach to the analysis of the Monte
+Carlo methodology for low-rank approximation in~\cite{RV07}. They consider $\mat{A}$ as a
+linear operator between finite-dimensional Banach spaces and apply techniques of
+probability in Banach spaces: decoupling, symmetrization, Slepian's lemma for
+Rademacher random variables, and a law of large numbers for operator-valued
+random variables. They show that, if $\mat{A}$ has numerical rank close to $k$,
+then it is possible to obtain an accurate rank-$k$ approximation to $\mat{A}$ 
+by sampling $\asymO{k\log k}$ rows of $\mat{A}$. Specifically, if one 
+projects $\matA$ onto the span of $\ell = \const{O}(\epsilon^{-4} k \log k)$ of its rows,
+then the approximant satisfies $ \|\matA - \tilde{\matA}\|_2 \leq \|\matA - \matA_k\|_2 + \epsilon\|\matA\|_2$
+with high probability. Here $\matA_k$ denotes the optimal rank-$k$ approximation to
+$\matA,$ obtainable as the rank-$k$ truncated SVD of $\matA.$
+
+Other researchers forwent the SVD entirely, considering instead alternative
+column and row-based matrix decompositions. In one popular class of approximations, 
+the matrix is approximated with a
+product $\mat{C}\mat{U}\mat{R},$ where $\mat{C}$ and $\mat{R}$ are respectively
+small subsets of the columns and rows of the matrix and $\mat{U},$ the
+%\emph{coupling matrix}, is a generalized inverse of the overlap of $\mat{C}$ and
+%$\mat{R}$ or the restriction of $\mat{A}$ to the column span of $\mat{C}$ and
+%the row span of $\mat{R}$~\cite{DKM06c}. That is, Accordingly, these schemes are known as
+\emph{coupling matrix}, is computed from $\matC$ and $\matR$~\cite{DKM06c}. 
+Accordingly, these schemes are known as CUR decompositions. Nystr\"om extensions,
+introduced by Williams and Seeger in~\cite{WS01}, are a similar class of
+low-rank approximations to positive-semidefinite matrices. They can be thought of
+as CUR decompositions constructed with the additional constraint that $\matC = \matR\transp,$
+to preserve the positive-semidefiniteness of the approximant. Both CUR and
+Nystr\"om decompositions can be constructed in one pass over the matrix.
+
+The paper~\cite{DMM08CUR} 
+introduced a ``subspace sampling'' method of sampling the columns and rows to form $\matC$ and
+$\matR$ and showed that approximations formed with $\const{O}(k \log k)$ columns
+and rows in this manner achieve Frobenius norm errors close to the optimal 
+rank-$k$ approximation error: $\|\matA - \matC \matU \matR\|_{\mathrm{F}} \leq (1 + \varepsilon) \|\matA - \matA_k\|_{\mathrm{F}}.$
+The \emph{leverage scores} of the columns of $\matA$ are used to generate
+the probability distribution used for column sampling: given $\matP,$ a projection onto
+the dominant $k$-dimensional right singular space of $\matA,$ the leverage score of the
+$j$th column of $\matA$ is proportional to $(\matP)_{ii}.$ The intuition is that
+the magnitude of the leverage score of a particular column reflects its influence in
+determining the dominant $k$-dimensional singular spaces of $\matA$~\cite{DM10}.
+
+In~\cite{MRT06,MRT11}, Tygert et al. introduced randomized Interpolative Decompositions (ID) as
+an alternative low-rank factorization to the SVD. In IDs, the columns of $\matA$ are 
+represented as linear combinations of some small subset of the columns of $\matA.$ The algorithm of~\cite{MRT06}
+is accelerated in~\cite{WLRT08}. With high probability, it constructs matrices 
+$\matB$ and $\boldsymbol{\Pi}$ such that $\matB$ consists of $k$ columns sampled from $\matA,$  some subset of the columns of 
+$\boldsymbol{\Pi}$ make up the $k \times k$ identity matrix, and 
+$ \|\matA - \matB \boldsymbol{\Pi}\|_2 = \const{O}(\sqrt{k m n} \|\matA - \matA_k\|_2).$
+
+The works of Har-Peled~\cite{HP06}, and
+Deshpande et al.~\cite{DRVW06} use more intricate approaches based on column sampling to 
+produce low-rank approximations with relative-error 
+Frobenius norm guarantees. These algorithms require, respectively, $\const{O}(k^2\log k)$ and $\const{O}(k)$ column samples.
+
+Boutsidis et al. develop a general framework for analyzing the error of 
+matrix approximation schemes based on column sampling in~\cite{BDM11a}, where they establish
+optimal bounds on the errors of approximants produced by projecting a matrix onto
+the span of some subset of its columns. In particular, they show that there are matrices
+that cannot be efficiently approximated in the spectral norm using the sampling paradigm;
+specifically, given positive integers $k \leq \ell \leq n,$ they 
+demonstrate the existence of a matrix $\matA$ such that 
+\[
+ \|\matA - \tilde{\matA}\|_2 \geq \left( 1+ \sqrt{\frac{n^2 + \alpha}{\ell^2 + \alpha}}\right) \|\matA - \matA_k\|_2 
+\]
+when $\tilde{\matA}$ is \emph{any} approximation obtained by projecting $\matA$ onto the span of $\ell$ of its columns. Because
+this bound holds regardless of how the columns are selected, it is clear that, at least in the spectral norm, the sampling paradigm is not 
+sufficient to obtain near optimal approximation errors. Stronger spectral norm guarantees can be obtained using the 
+random projection approach to matrix approximation.
+
+\section{The random-projection approach to matrix approximation}
+
+A wide range of results in RNLA have been inspired by the work of Johnson and Lindenstrauss
+in geometric functional analysis, who showed that embeddings into random low-dimensional
+spaces can preserve the geometry of point sets. The celebrated Johnson--Lindenstrauss lemma states that, given
+$n$ points in a high-dimensional space, a random projection into a space of dimension $\Omega(\log n)$
+preserves the distance between the points. Such geometry-preserving, dimension-reducing maps
+are known as Johnson--Lindenstrauss transforms (JLT).
+
+The work of Papadimitriou et al. in~\cite{PRTV00} on the algorithmic application of
+randomness to facilitate information retrieval popularized the use of JLTs in RNLA. 
+Unlike sample-based methods like the CUR decomposition that project the matrix onto the span of a
+subset of its \emph{columns} (and/or rows), random projection methods produce approximations
+to the matrix by projecting it onto some subspace of its entire \emph{range}. The intuition behind
+these methods is similar to that behind the power method, or orthogonal iteration:
+one can approximately capture the top left singular space of a matrix by applying it to
+a sufficiently large number of random vectors. One then obtains a low-rank approximation of the matrix
+by projecting it onto this approximate singular space. Projection-based 
+matrix approximation algorithms require at least two passes over the matrix: one to form
+an approximate basis for the top left singular space of the matrix, and one to 
+project the matrix onto that basis.
+
+In the influential paper~\cite{Sar06}, Sarl\'os developed fast approximation algorithms for SVDs, least squares, 
+and matrix multiplication under the randomized projection paradigm.
+His algorithms take advantage of Ailon and Chazelle's work, which establish
+that certain structured randomized transformations can be used to quickly compute
+dimension reductions~\cite{AC06}. At around the same time, Martinsson, Rohklin, and Tygert introduced a 
+randomized projection-based algorithm for the calculation of approximate SVDs~\cite{MRT06,MRT11}. In this algorithm,
+to obtain an approximate rank-$k$ SVD of $\matA,$ one applies $k+p$ gaussian vectors to $\matA$
+then projects $\matA$ onto the resulting subspace. Here, $p$ is a small integer known as the
+\emph{oversampling parameter}. The approximation returned by the algorithm can be written as
+$\tilde{\matA} = \matP_{\matA \matS} \matA,$ where $\matS$ is a Gaussian matrix and
+the notation $\matP_{\matM}$ denotes the projection
+onto the range of the matrix $\matM.$ The spectral norm error of the approximant is guaranteed to be at 
+most $\sqrt{\max{m , n}}\|\matA - \matA_k\|_2$ with high
+probability, and if $\matA$ is unstructured and dense, the algorithm costs $\const{O}(mnk)$ time. 
+Despite the fact that its runtime is asymptotically the same as those of classical Krylov iteration
+schemes (e.g. the Lanczos method), this algorithm is of interest because it requires only two passes over
+the matrix. Moreover, the algorithm performs well in the presence of degenerate singular values,
+a situation which often causes Lanczos methods to stagnate~\cite{MRT11}. Finally, this algorithm
+is more readily parallelizable than iterative schemes. 
+
+In~\cite{WLRT08}, inspired by Sarl\'os's work in~\cite{Sar06}, Woolfe et al. observed 
+that the runtime of the algorithm of~\cite{MRT06,MRT11}
+could be reduced to $\const{O}(mn \log(k) + k^4(m + n))$ by substituting a structured random
+matrix for the Gaussian matrix used in the original algorithm. Specifically, they show that if 
+the ``sampling matrix'' $\matS$ consists of $\const{O}(k^2)$ uniformly randomly selected columns of the product
+of the discrete Fourier transform matrix and a diagonal matrix of random signs, then the error guarantees
+of the algorithm remain unchanged while the worst-case runtime decreases. Nguyen et al. consider 
+the same approximation in~\cite{NDT09}, $\tilde{\matA} = \matP_{\matA \matS} \matA,$ 
+and obtain improved results: if $\matS$ has $\const{O}(k \log k)$ columns constructed as in the algorithm of~\cite{WLRT08},
+then with constant probability $\|\matA - \tilde{\matA}\|_2 \leq \sqrt{m/(k\log k)} \|\matA - \matA_k\|_2.$ 
+
+The paper~\cite{BDM11a} and the survey article~\cite{HMT11} constituted a significant step forward in the 
+analysis of random projection-based matrix approximation algorithms, because they provided a framework for the 
+analysis of the Frobenius and spectral norm errors of approximants of the form $\matP_{\matA\matS} \matA$ 
+using arbitrary sampling matrices $\matS.$ In~\cite{HMT11}, this framework is used to provide guarantees
+on the errors of approximants of the form $\tilde{\matA} = \matP_{\matA \matS} \matA$ for $\matS$ Gaussian
+and for $\matS$ consisting of uniformly randomly selected columns of the product of the Walsh--Hadamard 
+transform matrix and a diagonal matrix of random signs.
+
+\section{Nonasymptotic random matrix theory}
+
+% Random matrices are employed in an increasing number of applications; to mention
+% just a few: machine learning \cite{D04}, robust convex optimization
+% \cite{So09,Nem07}, approximation algorithms for NP hard optimization problems
+% \cite{Sar06,So09b,FPR10}, and randomized numerical linear algebra
+% \cite{HMT11,BD09}. In each of these applications, the efficacy of 
+% randomized algorithms is determined by the spectra of the random matrices used. 
+
+ The 
+ behavior of RNLA algorithms can often be analyzed in terms of the behavior
+ of a sum of random matrices. As an example, consider the entry-wise
+ sparsification schemes described earlier in the chapter: there, the 
+ approximants can be considered to be a sum of random matrices, where
+ each term in the sum contributes one entry to the approximant. In each
+ of the works cited, the design of the sparsification algorithm was
+ crucially influenced by the particular tool used to analyze its performance.
+ Achlioptas and McSherry used a concentration inequality due to Talagrand~\cite{AM01,AM07},
+ Arora et al. used scalar Chernoff bounds~\cite{AHK06}, Drineas et al. used the non-commutative
+ Khintchine inequalities~\cite{DNT10}, and Drineas and Zouzias used
+ matrix Bernstein inequalities~\cite{DZ11}. As the tools available to researchers 
+ increased in their generality, the sparsification algorithms became more sophisticated, 
+ and the analysis of their errors became sharper.
+
+The study of the spectra of random matrices is naturally divided into two 
+subfields: the nonasymptotic theory, which gives probability bounds that hold 
+for finite-dimensional matrices but may not be sharp, and the asymptotic theory,
+which precisely describes the behavior of certain families of matrices as their 
+ dimensions go to infinity. Unfortunately, the strength of the asymptotic techniques lies in the 
+determination of convergence and the development of asymptotically sharp bounds, rather than
+the development of tail bounds which hold at a fixed dimension. Accordingly,
+the nonasymptotic theory is of most relevance in RNLA applications. 
+ 
+%  The nonasymptotic theory has its roots in geometric
+% functional analysis in the 1970s, where random matrices were used to investigate
+% the local properties of Banach spaces
+% \cite{LindenstraussMilman93,DavidsonSzarek01,V12notes}. Since then, the
+% nonasymptotic theory has found applications in areas including theoretical
+% computer science \cite{Achlioptas03,Vempala04,SS08}, machine
+% learning \cite{DM05}, and optimization \cite{Nem07,So09}. 
+  
+The sharpest and most comprehensive
+results available in the nonasymptotic theory concern the behavior of Gaussian
+matrices. The amenability of the Gaussian distribution makes it possible to
+obtain results such as Szarek's nonasymptotic analog of the Wigner semicircle
+theorem for Gaussian matrices \cite{Sza90} and Chen and Dongarra's bounds on the
+condition number of Gaussian matrices \cite{ChenDongarra05}.
+The properties of less well-behaved random matrices can sometimes be related
+back to those of Gaussian matrices using probabilistic tools, such as
+symmetrization; see, e.g., the derivation of Lata{\l}a's bound on the norms of
+zero-mean random matrices \cite{Lat04}. 
+
+More generally, bounds on extremal eigenvalues can be obtained from knowledge of
+the moments of the entries. For example, the smallest singular value of a square
+matrix with i.i.d. zero-mean subgaussian entries is O($n^{-1/2}$) with high
+probability \cite{RV08b}. Concentration of measure results, such as Talagrand's
+concentration inequality for product spaces \cite{Talagrand95}, have also
+contributed greatly to the nonasymptotic theory. We mention in particular the
+work of Achlioptas and McSherry on randomized sparsification of matrices
+\cite{AM01,AM07}, that of Meckes on the norms of random matrices
+\cite{Meckes04}, and that of Alon, Krivelevich and Vu \cite{AKV02}
+on the concentration of the largest eigenvalues of random symmetric matrices,
+all of which are applications of Talagrand's inequality. In cases where
+geometric information on the distribution of the random matrices is available,
+the tools of empirical process theory---such as generic chaining, also due
+to Talagrand \cite{
+Talagrand05}---can be used to convert this geometric information into
+information on the spectra. One natural example of such a case consists of
+matrices whose rows are independently drawn from a log-concave distribution
+\cite{MP06,ALPT10b}.
+
+One of the most general tools in the nonasymptotic theory toolbox is
+the Noncommutative Khintchine Inequality
+(NCKI), which bounds the moments of the norm of a sum of randomly signed
+matrices~\cite{Lust-PiquardPisier91}. Despite its power and generality, the NCKI
+is unwieldy. To use it, one must reduce the problem to a suitable form by
+applying symmetrization and decoupling arguments and exploiting the equivalence
+between moments and tail bounds. It is often more convenient to apply the NCKI
+in the guise of a lemma, due to Rudelson~\cite{RU99}, that provides an analog of
+the law of large numbers for sums of rank-one matrices. This result has found
+many applications, including column-subset selection~\cite{RV07} and the fast
+approximate solution of least-squares problems~\cite{DMMS11}. The NCKI and its
+corollaries do not always yield sharp results because parasitic logarithmic
+factors arise in many settings.
+ 
+Classical exponential tail bounds for sums of independent random variables
+can be developed using the machinery of moment-generating functions (mgfs), by
+exploiting the fact that the mgf of a sum of independent random variables
+is the product of the mgfs of the summands. Ahlswede and 
+Winter~\cite{AW02} extended this technique to produce tail bounds for the eigenvalues of
+sums of independent Hermitian random variables. Because matrices are non-commutative,
+the matrix mgf of a sum of independent random matrices does not factor nicely
+as in the scalar case. The influential work of Ahlswede and Winter, as well as 
+the immediately following works developing exponential matrix probability inequalities,
+relied upon trace inequalities to circument the difficulty of noncommutativity~\cite{CM08,Recht09,Oliv09,Oliv10,Gross11}. 
+Tropp showed that these matrix probability inequalities can be sharpened considerably
+by working with cumulant generating functions instead of mgfs~\cite{T10a,T10b,Tropp11}.
+
+Chatterjee established that in the scalar case,
+powerful concentration inequalities could be recovered from arguments based
+on the method of exchangeable pairs~\cite{Chatterjee07}. Mackey and
+collaborators extended the method of exchangeable pairs to matrix-valued functions~\cite{MJCFT12}.
+The resulting bounds are sufficiently sharp to recover the NCKI, and can even
+be used to interrogate the behavior of matrix-valued functions of dependent
+random variables. Most recently, Paulin et al. have further extended the 
+matrix method of exchangeable pairs to apply to an even larger class of 
+matrix-valued functions~\cite{PMT13}.
+
+Despite the diversity of the tools mentioned here, all share a common limitation:
+they provide bounds only on the extremal eigenvalues of the relevant classes
+of random matrices.
+
+\section{Contributions}
+
+We conclude with a summary of the main contributions of this thesis.
+
+\subsection{Nonasymptotic random matrix theory}
+
+The matrix Laplace transform technique pioneered by 
+Ahlswede and Winter, which applies to sums of independent random matrices~\cite{AW02,T10a},
+is one of the most generally applicable techniques in the arsenal of nonasymptotic
+random matrix theory.
+
+However, the matrix Laplace transform technique yields bounds on only the extremal 
+eigenvalues of Hermitian random matrices. Chapter~\ref{ch1} describes an extension of the matrix
+Laplace transform technique, based upon the variational characterization of 
+the eigenvalues of Hermitian matrices, for bounding \emph{all} eigenvalues of 
+sums of independent random Hermitian matrices. This is the first
+general purpose tool for bounding interior eigenvalues of such a wide class
+of random matrices.
+
+The minimax Laplace transform introduced in Chapter~\ref{ch1} relates the 
+behavior of the $k$-th eigenvalue of a random self-adjoint matrix to the 
+behavior of its compressions to subspaces:
+\[
+ \Prob{\lambda_k(\mat{Y}) \geq t} \leq \inf_{\theta > 0} 
+ \min_{\mat{V}} \bigg\{ \e^{-\theta t} \cdot \E \trexp{\e^{\theta \mat{V}^\star \mat{Y} \mat{V}}} \bigg\}
+\]
+where the minimization is taken over an appropriate set of matrices 
+$\mat{V}$ with orthonormal columns. We show that when one has sufficiently 
+strong semidefinite bounds on the matrix cumulant generating functions 
+$\log \E \e^{\theta \mat{V}^\star \mat{X}_i \mat{V} }$ of the compressions 
+of the summands $\mat{X}_i$, the minimax Laplace transform technique yields 
+exponential probability bounds for all the eigenvalues of 
+$\mat{Y} = \sum\nolimits_i \mat{X}_i.$
+
+We employ the minimax Laplace transform to produce eigenvalue Chernoff, 
+Bennett, and Bernstein bounds. As an example of the efficacy of this technique,
+we use the Chernoff bounds to find new bounds on the interior eigenvalues of 
+matrices formed by sampling columns from matrices with orthonormal rows. We 
+also demonstrate that our Bernstein bounds are powerful enough to recover known
+estimates on the number of samples needed to accurately estimate the eigenvalues 
+of the covariance matrix of a Gaussian process by the eigenvalues of the sample
+covariance matrix. In the process of doing so, we provide novel results on the convergence rate of the
+individual eigenvalues of Gaussian sample covariance matrices.
+
+
+\subsection{Matrix sparsification}
+
+Chapter~\ref{ch2} analyzes the approximation errors of randomized 
+schemes that approximate a fixed $m \times n$ matrix $\mat{A}$ with a random
+matrix $\mat{X}$ having the properties that the entries of $\mat{X}$ are 
+independent and average to the corresponding entries of $\mat{A}$. This 
+investigation was initiated by the observation that several algorithms for 
+random matrix quantization and sparsification are based on approximations that
+have these properties~\cite{AM01,AHK06,AM07}. A generic framework for the 
+analysis of such approximation schemes is established, and this essentially
+recapitulates the known guarantees for the referenced algorithms. 
+
+We show that the spectral norm approximation error of such schemes can be controlled in terms 
+of the variances and fourth moments of the entries of $\mat{X}$ as follows:
+\begin{multline}
+ \E\snorm{\mat{A} - \mat{X}} \leq \const{C}\left[\max_j\bigg(\sum_k \var(X_{jk})
+ \bigg)^{1/2} \right. \\
+  + \max_k \bigg(\sum_j \var(X_{jk})\bigg)^{1/2} 
+  \left.  \bigg(\sum_{jk} \E(X_{jk} - a_{jk})^4 \bigg)^{1/4} \right],
+ \label{eqn:expected-spectral-sparsification-error}
+\end{multline}
+where $\const{C}$ is a universal constant. This expectation bound is obtained 
+by leveraging work done by Lata{\l}a on the spectral norm of random matrices 
+with zero mean entries~\cite{Lat04}. When the entries of $\mat{A}$ are bounded (so that the variances of the entries
+of $\mat{X}$ are small), an argument based on a bounded difference inequality
+shows that the approximation error does not exceed this expectation by much. 
+
+Inequality~\eqref{eqn:expected-spectral-sparsification-error} identifies 
+properties desirable in randomized approximation schemes: namely, that they 
+minimize the maximum column and row norms of the variances of the entries, 
+as well as the fourth moments of all entries. Thus our results supply guidance in the 
+design of future approximation schemes. The results also yield comparable analyses of 
+the quantization and sparsification schemes introduced in~\cite{AM01,AM07}
+and recover error bounds for the quantization/sparsification scheme
+proposed by Arora, Hazan, and Kale in~\cite{AHK06} that are comparable
+to those supplied in~\cite{AHK06}. However, for the more recent sparsification schemes
+presented in~\cite{DNT10,DZ11,AKL13}, our results do not provide
+sparsification guarantees as strong as those offered in the originating papers.
+
+Chapter~\ref{ch2} also analyzes the performance of randomized matrix 
+approximation schemes as measured using non-unitary invariant norms. The 
+literature on randomized matrix approximation has, with few exceptions, focused
+on the behavior of the spectral and Frobenius norms. However, depending on 
+the application, other norms are of more interest; for instance, the 
+$p \rightarrow q$ norms naturally arise when one considers $\mat{A}$ as a map 
+from $\ell_p(\R^n)$ to $\ell_q(\R^m).$ 
+Consider, in particular, the $\infty \rightarrow 1$ and $\infty \rightarrow 2$ 
+norms, both of which are NP-hard to compute. The $\infty \rightarrow 1$ norm has 
+applications in graph theory and combinatorics. The $\infty \rightarrow 2$ norm has applications in numerical linear algebra. 
+In particular, it is a useful tool in the column subset selection problem: that of,
+given a matrix $\mat{A}$ with unit norm columns, choosing a large subset of the 
+columns of $\mat{A}$ so that the resulting submatrix has a norm smaller than some 
+fixed constant (larger than one). 
+
+In a similar way that sparsification can assist in applications where the 
+spectral norm is relevant, we believe it can be of assistance in applications
+such as these where the norm of interest is a $p \rightarrow q$ norm. Our main 
+result is a bound on the expected $\infty \rightarrow p$ norm of random matrices 
+whose entries are independent and have mean zero:
+\[
+\E\norm{\mat{Z}}_{\infty\rightarrow p} \leq 
+2\E\pnorm{\sum\nolimits_k \varepsilon_k \mat{z}_k} + 2 \supoverqball 
+\E\sum\nolimits_k \left|\sum\nolimits_j \varepsilon_j Z_{jk} u_j \right|.
+\]
+Here $\vec{\varepsilon}$ is a vector of i.i.d.~random signs, $\vec{z}_k$ is the 
+$k$th column of $\mat{Z},$ and $p^{-1} + q^{-1} = 1$. This implies
+the following bounds on the $\infty \rightarrow 1$ and $\infty \rightarrow 2$ norms:
+\begin{align*}
+ \E\infonorm{\mat{Z}} & \leq2\E(\colnorm{\mat{Z}}+\colnorm{\mat{Z}\transp})\quad \text{ and} \\
+ \E\inftnorm{\mat{Z}} & \leq2\E\fnorm{\mat{Z}}+2\min_{\mat{D}}\E\norm{\mat{Z}\mat{D}^{-1}}_{2\rightarrow\infty},
+\end{align*}
+where the minimization is taken over the set of positive diagonal matrices 
+satisfying $\trace(\mat{D}^2) = 1.$ The norm $\norm{\mat{Z}}_{2\rightarrow\infty}$ 
+is the largest of the Euclidean norms of the rows of the matrix, $\fnorm{\mat{Z}}$ 
+is the Frobenius norm, and the column norm $\colnorm{\mat{Z}}$ is the sum of the 
+Euclidean norms of the columns of the matrix. As in the case of the spectral norm, 
+a bounded differences inequality 
+guarantees that if the entries of $\mat{A}$ are bounded, then the errors 
+$\|\mat{A} - \mat{X}\|_{\infty \rightarrow \xi}$ for $\xi \in \{1,2\}$ concentrate about these expectations. 
+Thus we have bounds on norms which 
+are NP-hard to compute, in terms of much simpler quantities. Both these bounds
+are optimal in the sense that each term in the bound can be shown to be necessary.
+In the case of the $\infty \rightarrow 1$ norm, a matching lower bound
+establishes the sharpness of the bound.
+
+\subsection{Low-rank approximation using fast unitary transformations}
+
+Chapter~\ref{ch3} offers a new analysis of the subsampled randomized Hadamard 
+transform (SRHT) approach to low-rank approximation. This is a specific instance 
+of a class of low-rank approximation algorithms based on fast unitary
+transformations, and the analysis provided applies, \emph{mutatis mutandis}, to
+other low-rank approximation algorithms which use fast unitary transformations.
+
+% The intuition behind these methods is essentially the same as that behind the 
+% classical subspace iteration algorithms: if $\mat{A} \in \R^{m \times n}$ can 
+% be approximated well by a rank-$k$ matrix (i.e. if $\mat{A}$ has sufficient 
+% spectral decay) then one can capture the top $k$-dimensional singular spaces 
+% of $\mat{A}$ by applying $\mat{A}$ to a collection of more than $k$ random 
+% vectors. The corresponding low-rank approximation is then just the projection 
+% of $\mat{A}$ onto the span of these vectors. The use of \emph{more} than $k$ 
+% random vectors allows these projection methods to find good low-rank 
+% approximations without iteration; as the oversampling increases, 
+% the probability that the approximation returned is at least 
+% as accurate as the optimal rank-$k$ approximation increases. 
+
+Let $\ell > k$ be a positive integer and let $\mat{S} \in \R^{n \times \ell}$ 
+be a matrix whose columns are random vectors, then projection methods 
+approximate $\mat{A}$ with $\mat{P}_{\mat{A} \mat{S}} \mat{A},$ which has 
+rank at most $\ell.$ Here, the notation $\mat{P}_{\mat{M}}$ denotes the projection 
+onto the range of $\mat{M}$. One can 
+reduce the cost of the algorithm by using random matrices $\matS$ whose structure 
+allows for fast multiplication. Specifically, one can reduce the cost of 
+forming the product $\mat{A} \mat{S}$ from $\const{O}(mn\ell)$ to 
+$\const{O}(m n \log \ell )$. One choice of a structured random matrix is the
+transpose of the subsampled randomized Hadamard transform (SRHT),
+\[
+ \mat{S} = \sqrt{\frac{n}{\ell}} \cdot \mat{D} \mat{H}\transp \mat{R}\transp.
+\]
+Here, $\mat{D}$ is a diagonal matrix whose entries are independent random 
+uniformly distributed signs, $\mat{H}$ is a normalized Walsh--Hadamard matrix
+(a particular kind of orthogonal matrix, each of whose entries has modulus 
+$n^{-1/2}$), and $\mat{R}$ is a matrix that restricts an $n$-dimensional 
+vector to a random size $\ell$ subset of its coordinates. It is not necessary 
+that $\mat{H}$ be a normalized Walsh--Hadamard matrix; other orthogonal 
+transforms whose entries are on the order of $n^{-1/2}$ can be used as 
+well, such as the discrete cosine transform or the discrete Hartley transform.
+
+The previous tightest bound on the spectral-norm error of SRHT-based low-rank
+approximations is given in~\cite{HMT11}, where it is shown that 
+\[
+ \snorm{\mat{A} - \mat{P}_{\mat{A}\mat{S}}\mat{A}} \leq 
+ \left(1 + \sqrt{\frac{7n}{\ell}}\right) \snorm{\mat{A} - \mat{A}_k}
+\]
+with probability at least $1 - \const{O}(1/k)$ when $\ell$ is at least on 
+the order of $k \log k.$ In some situations, this bound is close to optimal. 
+But when $\mat{A}$ is rank-deficient or has fast spectral decay, this result 
+does not reflect the correct behavior. In Chapter~\ref{ch3} we establish that
+\[
+ \snorm{\mat{A} - \mat{P}_{\mat{A}\mat{S}}\mat{A}} \leq 
+ \const{O}\left(\sqrt{\frac{\log(n)\log(\text{rank}(\matA))}{\ell}}\right) 
+ \snorm{\mat{A} - \mat{A}_k} + \const{O}\left(\sqrt{\frac{\log(\text{rank}(\matA))}{\ell}}\right) 
+ \fnorm{\mat{A} - \mat{A}_k}
+\]
+with constant failure probability. The factor 
+in front of the optimal error has been reduced at the cost of 
+the introduction of a Frobenius term. This Frobenius term is small when 
+$\mat{A}$ has fast spectral decay. We also find Frobenius-norm error bounds.
+
+\subsection{Randomized SPSD sketches}
+
+Chapter~\ref{ch4} considers the problem of forming a low-rank approximation 
+to a symmetric positive-semidefinite matrix $\matA\in\R^{n\times n}$ using ``SPSD sketches.'' 
+Let $\matS$ be a matrix of size $n \times \ell,$ where $\ell \ll n.$ Then the
+SPSD sketch of $\matA$ corresponding to $\matS$ is $\matC \matW^\pinv \matC\transp,$
+where 
+\[
+ \matC = \matA \matS \quad \text{ and }\quad \matW = \matS\transp \matA \matS.
+\]
+
+Sketches formed according to this model have rank at most $\ell$ and are 
+also symmetric positive-semidefinite. The simplest such SPSD sketches 
+are formed by taking $\matS$ to contain random columns sampled uniformly 
+without replacement from the appropriate identity matrix. These sketches, 
+known as Nystr\"om extensions, are popular in applications where it is
+expensive or undesirable to have full access to $\matA:$ Nystr\"om extensions
+require only knowledge of $\ell$ columns of $\matA.$
+
+The accuracy of SPSD sketches can be increased using the so-called power method,
+wherein one takes the sketching matrix to be $\matS = \matA^p \matS_0$ for
+some integer $p \geq 2$ and $\matS_0$ is a sketching matrix. The corresponding
+SPSD sketch is $\matA^p \matS_0 (\matS_0\transp \matA^{2p -1} \matS_0)^\pinv \matS_0\transp \matA^p.$
+
+Chapter~\ref{ch4} establishes a framework for the analysis of SPSD sketches, 
+and supplies spectral, Frobenius, and trace-norm error bounds for SPSD
+sketches corresponding to random $\matS$ sampled from several distributions.
+The error bounds obtained are asymptotically smaller than the other bounds
+available in the literature for SPSD sketching schemes. Our bounds
+apply to sketches constructed using the power method, and we see that 
+the errors of these sketches decrease like $(\lambda_{k+1}(\matA)/\lambda_k(\mat{A}))^p.$
+
+In particular, our framework supplies an optimal spectral-norm error bound 
+for Nystr\"om extensions.
+Because they are based on uniform column sampling, Nystr\"om extensions perform
+best when the information in the top $k$-dimensional eigenspace is distributed
+evenly throughout the columns of $\mat{A}.$ One way to quantify this idea 
+uses the concept of \emph{coherence}, taken from the matrix completion 
+literature~\cite{CR09}. Let $\mathcal{S}$ be a $k$-dimensional subspace of 
+$\R^n$. The coherence of $\mathcal{S}$ is
+\[
+ \mu(\mathcal{S}) = \frac{n}{k} \max\nolimits_i (\mat{P}_{\mathcal{S}})_{ii}.
+\]
+The coherence of the dominant $k$-dimensional eigenspace of $\mat{A}$ is a 
+measure of how much comparative influence the individual columns of 
+$\mat{A}$ have on this subspace: if $\mu$ is small, then all columns have 
+essentially the same influence; if $\mu$ is large, then it is possible that 
+there is a single column in $\mat{A}$ which alone determines one of the top 
+$k$ eigenvectors of $\mat{A}.$ 
+
+Talwalkar and Rostamizadeh were the first to use coherence in the analysis of 
+Nystr\"om extensions. Let $\mat{A}$ be exactly rank-$k$ and $\mu$ denote the
+coherence of its top $k$-dimensional eigenspace. In~\cite{RT10}, they show 
+that if one samples on the order of $\mu k \log(k/\delta)$ columns to form a 
+Nystr\"om extension, then with probability at least $1-\delta$ the Nystr\"om
+extension is \emph{exactly} $\matA.$ The framework provided in Chapter~\ref{ch4} allows us to expand this 
+result to apply to matrices with arbitrary rank. Specifically, we show that
+when $\ell = \const{O}(\mu k \log k),$ then
+\[
+ \TNorm{\matA - \matC \matW^\pinv \matC\transp} \leq  
+ \left(1 + \frac{n}{\ell} \right) \TNorm{\matA - \matA_k}.
+\]
+with constant probability. This bound is shown to be optimal in the worst case.
+
+Low-rank approximations computed using the SPSD sketching model are
+\emph{not} guaranteed to be numerically stable: if $\matW$ is 
+ill-conditioned, then instabilities may arise in forming the product 
+$\matC \matW^\dagger \matC\transp$. A regularization scheme proposed in~\cite{WS01}
+suggests avoiding numerical ill-conditioning issues by using an SPSD
+sketch constructed from the matrix $\matA + \rho \matI,$ where $\rho > 0$
+is a regularization parameter. In Chapter~\ref{ch4}, we provide the first
+error analysis of this regularization scheme, and compare it empirically
+to another regularization scheme introduced in~\cite{CD11}.
+
+Finally, in addition to theoretical results, Chapter~\ref{ch4} provides a detailed
+suite of empirical results on the performance of SPSD sketching schemes
+applied to matrices culled from data analysis and machine learning applications.

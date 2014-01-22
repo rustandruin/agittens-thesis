@@ -1,0 +1,145 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{CaltechThesis}[2013/03/25 Alex Gittens Style for Caltech Thesis]
+\RequirePackage{kvoptions}
+
+%% My package for Caltech Thesis
+% must be used in combination with new_cit_thesis.cls
+% Author: Mulin Cheng
+% hacked to bits by Peter Stobbe
+% modified by Alex Gittens
+
+% random stuff I found recommended somewhere
+\RequirePackage[l2tabu,orthodox]{nag} % nag about obsolete LaTeX
+\RequirePackage{fixltx2e} % silently fix various LaTeX bugs and infelicities
+\RequirePackage{amsmath} %
+\RequirePackage{amsthm} %
+\RequirePackage{mathtools} % silently fix amsmath bugs and infelicities
+\RequirePackage{colonequals} % better :=
+
+%-----trying out different fonts:
+%\RequirePackage{textcomp}
+
+\RequirePackage{charter}
+\RequirePackage[bitstream-charter]{mathdesign}
+\RequirePackage{charter}
+
+% also tried : \RequirePackage{fouriernc} % kind of bland, \nsubseteq not defined, looks weird at less than 100% zoom
+
+
+% \RequirePackage{amssymb}
+\RequirePackage{bm} % need for mathbf with mathdesign
+
+
+%\RequirePackage{lmodern} % -**better**- typography
+\RequirePackage[T1]{fontenc} % --*better*-- typography
+
+%% language                                                                      
+\RequirePackage[english]{babel}                                                 
+
+\RequirePackage{ulem}                                       % Extra strik-through fonts
+\normalem
+\RequirePackage[sans]{dsfont} % for bold ones vector
+%\newcommand{\chatone}{\mathds{1}}
+
+%% Color
+\RequirePackage[usenames,dvipsnames]{color}                  % Provide colors to Latex
+
+
+%% Format and Layout
+% \setlength{\parindent}{0in}                                 % Paragraph indention
+% \RequirePackage{sectsty}
+% \chapterfont{\raggedleft}                                   % Chapter title right algined
+\RequirePackage{titlesec}
+\newcommand*{\justifyheading}{\raggedleft}
+% \titleformat{\chapter}[display]
+% {\normalfont\huge\bfseries\justifyheading}{\chaptertitlename\ \thechapter}
+% {20pt}{\huge}
+
+\RequirePackage{paralist}                                     % Inline list 
+
+%% Floats
+\RequirePackage{float}                                      % Floating Environments
+\RequirePackage{multirow}                                   % Multicolumn Layout
+\RequirePackage{colortbl}
+\RequirePackage{arydshln}                                   % dash line tablur
+
+%% Graphics\usepackage[pdftex]{graphicx}
+%\RequirePackage[pdftex]{graphicx}                                   % Use with pdfLatex only
+\DeclareGraphicsExtensions{.pdf,.png,.jpg,.mps}             % types of image files Latex looks for
+
+\RequirePackage[tight]{subfigure}                                  % Multi Figures
+
+%% Header and Footer
+% confined by cit thesis
+
+%% citation & reference
+% \newcommand{\eqnref}[1]{eqn.(\ref{eq:#1})}                % equation reference
+% \newcommand{\figref}[1]{fig.\ref{fig:#1}}                % figure reference
+% \newcommand{\tabref}[1]{tab.\ref{tab:#1}}                % table reference
+% \newcommand{\secref}[1]{sec.\ref{sec:#1}}                % section reference
+% \newcommand{\algref}[1]{alg.\ref{alg:#1}}                % algorithm reference
+% \newcommand{\thmref}[1]{Thm.\ref{thm:#1}}
+
+% %% Code typesetting
+% \RequirePackage{textcomp}
+% \RequirePackage{listings}                                    % Typesetting matlabe code. This section need to be updated to include C, C++ and etc. 
+% \lstset{language=Matlab,
+% 	basicstyle=\small,
+% 	keywordstyle=\color{blue}\bfseries,
+% 	identifierstyle=\color{Brown},
+% 	commentstyle=\color{YellowGreen},
+%   	numbers=left, 
+% 	numberstyle=\tiny, 
+% 	stepnumber=1}
+
+
+%% Pseudo-code typesetting - using algorithm2e
+\usepackage[ruled,algochapter,vlined]{algorithm2e}
+\newcommand{\listofalgorithmes}{\tocfile{\listalgorithmcfname}{loa}} % fix needed for bug, so list will be in toc
+
+% other options considered:
+%\usepackage[chapter]{algorithm}
+%\usepackage{algpseudocode}
+%\usepackage{algorithmicx}
+%\alglanguage{algpseudocode}
+
+\RequirePackage[colorinlistoftodos,disable]{todonotes}
+
+
+% load microtype AFTER fonts!
+\RequirePackage{microtype} % ***better*** typography
+
+\RequirePackage{xcolor}
+\definecolor{dark-red}{rgb}{0.4,0.15,0.15}
+\definecolor{dark-blue}{rgb}{0.15,0.15,0.4}
+\definecolor{medium-blue}{rgb}{0,0,0.5}
+
+% PDF and HyperLinks
+%\RequirePackage{pdfpages} % commented out on 20th % what does this do?
+\RequirePackage[backref,pdfpagelabels]{hyperref} 
+\hypersetup{
+  pdftitle={Analyses of Randomized Linear Algebra},
+  pdfauthor={Alex Gittens},
+  pdfsubject={Analysis of several linear algebra algorithms that exploit randomization},
+  pdfkeywords={{randomization},{numerical linear algebra},{low-rank approximation},{sparsification}},
+    colorlinks, 
+		citecolor={medium-blue},
+		linkcolor={dark-red},
+    %citecolor={dark-blue}, 
+		%urlcolor={medium-blue},
+		pdfcreator="Alex Gittens",
+  plainpages=false,
+%  pdfpagelabels=true,
+  unicode=true,                           % non-Latin characters in Acrobat’s bookmarks
+}
+
+\RequirePackage[nottoc]{tocbibind} % add acknowledgements, list of figures to toc but not toc itself
+
+%% Preview-Latex
+% \usepackage[displaymath,textmath,sections,graphics,floats]{preview}
+
+\usepackage[displaymath,textmath,graphics,floats]{preview}
+
+% \PreviewEnvironment{enumerate}
+
+\pdfoptionpdfminorversion 6 % make warning about using 1.6 pdfs go away

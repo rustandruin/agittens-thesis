@@ -1,0 +1,927 @@
+\documentclass[xcolor={svgnames,pdftex,dvipsnames,table},10pt]{beamer} %was usenames
+\usefonttheme[]{serif} 
+\usefonttheme{professionalfonts}
+\usecolortheme[named=MidnightBlue]{structure}
+\usetheme[height=7mm]{Rochester}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\useoutertheme{umbcfootline}
+\useinnertheme{umbctribullets}
+\useinnertheme{umbcboxes}
+\setfootline{\insertshortauthor \quad \insertshorttitle \quad \insertshortdate \hfill \insertframenumber/\inserttotalframenumber}
+\usepackage[utf8]{inputenc}
+\usepackage{kerkis}
+\usepackage{bm}
+\usepackage{colortbl}
+\usepackage[noend]{algpseudocode}
+%\usepackage[scaled=0.875]{helvet}%
+\renewcommand{\ttdefault}{lmtt}%
+
+\usepackage{etoolbox}
+\let\bbordermatrix\bordermatrix
+\patchcmd{\bbordermatrix}{8.75}{4.75}{}{}
+\patchcmd{\bbordermatrix}{\left(}{\left[}{}{}
+\patchcmd{\bbordermatrix}{\right)}{\right]}{}{}
+
+\include{macros}
+
+%add footnotes to indicate support
+\usepackage[absolute,overlay]{textpos} 
+\newenvironment{support}[2]{% 
+  \begin{textblock*}{\textwidth}(#1,#2) 
+      \footnotesize\it\bgroup\color{black!50}}{\egroup\end{textblock*}}
+			
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,fit}
+\tikzstyle{every picture}+=[remember picture]
+\tikzstyle{na} = [baseline=-.5ex]
+\everymath{\displaystyle}
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\hypersetup{%
+  pdftitle={Topics in Randomized Numerical Linear Algebra},%
+  pdfauthor={Alex Gittens},%
+  pdfsubject={PhD defense talk},%
+  pdfkeywords={random matrix theory, randomized numerical linear algebra, low-rank approximation, sparsification, 
+  dimension reduction}%
+}
+\hypersetup{plainpages    = false,
+            pdfnewwindow  = false}
+            %pdfpagemode   = FullScreen}
+\hypersetup{colorlinks=true,urlcolor=blue}
+
+% add bookmarks for easier navigations
+\usepackage{bookmark}
+\usepackage{etoolbox}
+\makeatletter
+\apptocmd{\beamer@@frametitle}{
+  % keep this line to add the frame title to the TOC at the "subsection level"
+  \addtocontents{toc}{\protect\beamer@subsectionintoc{\the\c@section}{0}{#1}{\the\c@page}{\the\c@part}%
+        {\the\beamer@tocsectionnumber}}%
+  % keep this line to add a bookmark that shows up in the PDF TOC at the subsection level
+  \bookmark[page=\the\c@page,level=3]{#1}
+  }%
+  {\message{** patching of \string\beamer@@frametitle succeeded **}}%
+  {\message{** patching of \string\beamer@@frametitle failed **}}%
+\makeatother
+
+%\setbeamertemplate{navigation symbols}{}
+\setbeamercovered{dynamic}
+
+\newtheorem*{thm}{Theorem}
+
+% Titlepage info
+\title{Topics in Randomized Numerical Linear Algebra}
+\author[A. Gittens]{Alex Gittens}
+\institute[Caltech]{%
+Applied and Computational Mathematics \\
+California Institute of Technology \\
+\href{mailto:gittens@caltech.edu}{gittens@caltech.edu} \\
+}
+
+\date[May 2013]{May 31, 2013}
+
+\begin{document}
+
+\begin{frame}[plain]
+\begin{support}{19mm}{85mm}
+
+\end{support}
+\titlepage
+\end{frame}
+
+\section{Introduction}
+\begin{frame}{Randomized Numerical Linear Algebra}
+\end{frame}
+
+\begin{frame}
+ We consider the performance of two classes of randomized low-rank approximants:
+ \begin{itemize}
+  \item \emph{Projection-based schemes}. We approximate $\matA$ by projecting
+  it onto a random subspace of its range:
+   $\matM = \matP_{\matA \matS} \matA$
+   
+  \item \emph{SPSD sketches}. Here $\matA$ is symmetric positive-semidefinite and we
+  take $\matM = \matC \matW^\pinv \matC\transp,$ where 
+  \[
+   \matC = \matA \matS \quad \text{ and } \quad \matW = \matS\transp \matA \matS
+  \]
+  and $\matW^\pinv$ denotes the Moore-Penrose pseudoinverse of $\matW.$
+ \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Optimal rank-$k$ approximation}
+Fix $\matA \in \R^{m \times n}$ with $m \geq n.$
+
+The most accurate rank-$k$ approximation in the spectral and Frobenius norms
+\[
+ \matA_k = \underset{%
+               \substack{%
+                 \matM \in \R^{m \times n} \\ 
+                 \operatorname{rank}(\tilde{\matA}) \leq k}}%
+           {\operatorname{argmin}}  
+           \|\matA - \matM\|_\xi, \quad \text{ for $\xi \in \{2, \mathrm{F}\}$}.
+\]
+can be computed in $\mathrm{O}(mn^2)$ time via the Singular Value Decomposition (SVD): if
+\[
+\mat{A} = \mat{U} \mat{\Sigma} \mat{V}\transp = \bbordermatrix{%
+&^k \vspace{-0.75ex} & \!\!^{n-k}  \hspace{1ex}\cr
+& \vspace{0.25ex} \mat{U}_1 \hspace{-2ex} & \mat{U}_2 
+}
+\bbordermatrix{%
+& \vspace{-0.75ex} ^k &\!\!^{n-k} \hspace{1ex}\cr
+& \mat{\Sigma}_1 & \cr
+& \vspace{0.5ex} & \mat{\Sigma}_2 
+}
+\left[
+\begin{matrix}
+\mat{V}_1\transp \!\! \\
+\mat{V}_2\transp \!\! 
+\end{matrix}
+\right]
+\]
+then $\matA_k = \matU_1 \matSig_1 \matV_1\transp.$
+
+\end{frame}
+
+\begin{frame}
+ We measure the approximation accuracies relative to those of $\matA_k.$
+ 
+ \begin{itemize}
+  \item An approximation $\matM$ satisfies a \emph{relative-error bound} if
+           \[
+           \|\matA - \matM\|_\xi \leq (1 + \epsilon) \|\matA - \matA_k\|_\xi 
+           \]
+  for an $\epsilon > 0.$
+  
+  \item It satisfies an \emph{additive-error bound} if 
+           \[
+            \|\matA - \matM\|_\xi \leq \|\matA - \matA_k\|_\xi + \epsilon
+           \]
+  for an $\epsilon > 0.$ In this case, $\epsilon$ is called the \emph{additional error}.
+ \end{itemize}
+
+ 
+\begin{displaybox}{0.7\linewidth}
+\parbox{\linewidth}{Goal: Find relative- and additive-error bounds for randomized low-rank approximation schemes.}
+\end{displaybox}
+ 
+\end{frame}
+
+\begin{frame}{The target audience}
+ Who is interested in these approximations, and what do they want?:
+ \begin{itemize}
+  \item The \emph{numerical linear algebra community} wants high quality approximations
+  with very low failure rates and low communication cost.
+  \item The \emph{machine learning community} wants approximations whose errors are on par
+  with modeling inaccuracies and the imprecision of the data
+  \item The \emph{optimization community} is interested in varying levels of quality.
+  \item The \emph{theoretical computer science community} is interested in understanding the
+  behavior of these algorithms, e.g. what is the optimal tradeoff between the error, failure rate,
+  and the amount of arithmetic operations involved? How can communication cost be minimized?
+ \end{itemize}
+\end{frame}
+
+\section{Overview of classical iterative methods}
+\begin{frame}{Direct and iterative low-rank approximation methods}
+ Classical \emph{direct} methods (e.g. SVD or rank-revealing QR factorizations) are not appropriate
+ for large matrices:
+ \begin{itemize}
+  \item Require forming an expensive ($\mathrm{O}(mn^2)$ time) factorization of 
+  $\matA$ first.
+  \item Can densify intermediate matrices, so do not take advantage of sparsity.
+ \end{itemize}
+ 
+ Classical \emph{iterative} methods are more appropriate:
+ \begin{itemize}
+  \item They do not factorize $\matA.$
+  \item They build low-rank approximations iteratively, and check for convergence
+  \item They can take advantage of sparsity.
+  \item They focus on recovering the singular spaces of the matrix.
+ \end{itemize}
+\end{frame}
+
+\begin{frame}{Iterative method 1: Subspace iteration}
+
+The top $k$-dimensional left invariant subspace of $\matA$ is the top $k$-dimensional eigenspace of $\matA\matA\transp.$
+Subspace iteration captures this space by repeatedly applying $\matA\matA\transp$ to
+a random set of vectors.
+\[
+\mathcal{R}((\matA\matA\transp)^q\matS) \rightarrow \mathcal{R}(\matU_1) 
+\]
+<Anim rotation of space as $B$ applied>
+
+Speed of convergence is determined by $(\lambda_{k+1}(\matA)/\lambda_k(A))^q.$
+\end{frame}
+
+\begin{frame}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+ \algrenewcommand\algorithmicensure{\textbf{Output:}}
+ \begin{algorithmic}[1]
+  \Statex
+  
+ \State Let $\matY = \matA \matS.$
+ \State Compute the QR decomposition $\matY = \matQ \matR.$
+ \State Compute the SVD of $\matQ\transp \matA = \matW \tilde{\matSig} \tilde{\matV}\transp.$
+ \State Set $\tilde{\matU} = \matQ \matW.$
+\end{algorithmic}
+
+\end{frame}
+
+\begin{frame}{Iterative method 2: Lanczos iteration}
+ Krylov subspace (Lanczos)
+ methodology: capture top singular space, then use to approx singular values
+ have guarantees on quality of singular space as function of mult. eigengap
+ and iterations. 
+ In practice, test for convergence, have numerical issues requiring
+ complicated restarting/deflating etc. processes, efficiency depends on
+ properties of the matrix (e.g. degenerate singular values cause issues)
+ 
+ Separate issues of singular space from sing values
+\end{frame}
+
+\section{Fast projection-based low-rank approximation}
+\begin{frame}{Projection-based low-rank approximations}
+ <Illustrate>
+ Capture top singular space of matrix, then project onto it
+ Unlike the classical algorithms, the goal is to d
+\end{frame}
+
+\begin{frame}
+ \algrenewcommand\algorithmicrequire{\textbf{Input:}}
+ \algrenewcommand\algorithmicensure{\textbf{Output:}}
+ \begin{algorithmic}[1]
+  \Require{ an $m \times n$ matrix $\matA$ and an $n \times \ell$ matrix 
+            $\matS,$ where $\ell$ is an integer in $[1,n].$ }
+  \Ensure{matrices $\tilde{\matU}, \tilde{\matSig}, \tilde{\matV}$ 
+          constituting the SVD of $\matP_{\matA\matS}\matA= \tilde{\matU} \tilde{\matSig} \tilde{\matV}\transp.$}	
+  \Statex
+  
+ \State Let $\matY = \matA \matS.$
+ \State Compute the QR decomposition $\matY = \matQ \matR.$
+ \State Compute the SVD of $\matQ\transp \matA = \matW \tilde{\matSig} \tilde{\matV}\transp.$
+ \State Set $\tilde{\matU} = \matQ \matW.$
+\end{algorithmic}
+\end{frame}
+
+\begin{frame}{Comparison with classical iterative methods}
+ Comparison with classical methods:
+ how it's like Lanczos/Krylov-space w/o many iterations, or orthog iteration
+ running time comparison (same-ish, but Lanczos complicated implementation 
+ and number of iterations variable on matrix), communication cost comparison (better, 2ish passes)
+ importance of error bounds to guiding understanding (b/c can't check error iteratively)
+\end{frame}
+
+\begin{frame}
+ <Illust> examples of it working
+\end{frame}
+
+\begin{frame}
+ History: , origi by Papadimitriou, popularized by Sarlos, Wolfe et al. use randomized projections 
+\end{frame}
+
+\begin{frame}
+ Importance of oversampling, spectral decay, power method, type of randomness used
+\end{frame}
+
+\begin{frame}{The advantage of fast transformations}
+ Advantage of subsampled fast orthogonal transforms when not using power method. E.g. SRHT (define) 
+\end{frame}
+
+\begin{frame}
+introduce SRFT etc.
+ Wolfe et al. realized fast transformation
+ known results
+ \end{frame}
+
+\begin{frame}
+Goal: to reduce the amount of oversampling needed to get good bounds
+ Known results vs our results for SRHT (when one better than other)
+ mention did work with Christos
+\end{frame}
+
+\begin{frame}
+ Structural result at the basis of our result
+ Idea: take advantage of spectral decay in the tangent
+\end{frame}
+
+\begin{frame}
+ main ideas of proof: 
+ spread out energy evenly across columns of matrix, connection w/ spectral norm
+ preserve singular values via concentration argument
+ preserve spectral norm
+ matrix multiplication result
+\end{frame}
+
+\begin{frame}
+ outline spectral norm result
+\end{frame}
+
+\begin{frame}
+ outline Frobenius norm result
+\end{frame}
+
+\section{SPSD Sketches}
+\begin{frame}
+ problem of preserving positivity in addition to getting low-rank approximation
+ could use above projection-based schemes
+ alternative schemes which eliminate projection step (give spsd approx scheme)
+\end{frame}
+
+\begin{frame}
+ How the two compare: 
+ stable, low-error w/ two passes
+ unstable in general, low-error w/ one-pass still higher than other 
+ when take as many passes as stable, even lower error
+ <Illust>
+\end{frame}
+
+\begin{frame}
+Note sketching allows for both column-sampling and mixture-based schemes
+
+In particular, SPSD sketch scheme incorporates Nystr\"om extensions, which use
+ no information on matrix other than size, requires only column sampling
+ <Illust>
+\end{frame}
+
+\begin{frame}
+ introduce more particular examples of sketching schemes: gaussian, levscore, SRFT
+\end{frame}
+
+\begin{frame}
+ explain leverage scores (better measure of nonuniformity)
+ explain coherence (cruder)
+\end{frame}
+
+\begin{frame}
+ Previous results on SPSD sketching (non-adaptive!):
+ Nystrom, CD11
+ give table
+ our results asymptotically better
+ comment not many other SPSD sketching schemes considered 
+\end{frame}
+
+\begin{frame}
+ give table w/ error information
+ argue all perform well in practice
+\end{frame}
+
+\begin{frame}
+ Approach to analyzing SPSD sketch performance:
+ First deterministic results
+ Plug in stochastic for tangent
+\end{frame}
+
+\begin{frame}
+ Key point: realize the factorization of CWC in terms of $A^{p- 1/2}$
+ Note can replace $A^{1/2}$ with generalized Cholesky factorization
+ Also explains why SPSD sketches with same number of iterations better
+ than projection based approxs
+\end{frame}
+
+\begin{frame}
+ derive spectral bound -- can relate directly to earlier deterministic bound
+\end{frame}
+
+\begin{frame}
+ derive Frobenius bound -- need to do some more estimations
+\end{frame}
+
+\begin{frame}
+ derive trace norm bound -- simple
+\end{frame}
+
+\begin{frame}
+ Given established framework, note which quantities need bounding
+ For leverage-based scheme, blah blah
+ For gaussian-based scheme, blah blah
+\end{frame}
+
+\begin{frame}
+state leverage based result
+\end{frame}
+
+\begin{frame}
+ state gaussian based result
+ compare to leverage-based
+\end{frame}
+
+\begin{frame}
+ state SRFT-based result
+ compare to gaussian/lev
+\end{frame}
+
+\begin{frame}
+To get Nystr\"om result, need bound blah, observe
+can be written as sum of rank one mats,
+use matrix Chernoff bound
+\end{frame}
+
+\begin{frame}
+ state and explain matrix Chernoff bound
+\end{frame}
+
+\begin{frame}
+recall coherence
+ state Nystr\"om result
+ point out dependence on $\mu$
+\end{frame}
+
+\begin{frame}
+ illustrate dependence on $\mu$ and sparsity of U1
+\end{frame}
+
+\begin{frame}
+ illustrate optimality dimensional dependence in rel err bound for Nystrom
+\end{frame}
+
+\begin{frame}
+ prove optimality of rel err bound for Nystrom
+\end{frame}
+
+\begin{frame}
+ introduce stabilization algorithms:
+ one use Tikhonov regularization, one truncates W
+ one which I thought was due to me but actually due to WS01, one due to CD11
+\end{frame}
+
+\begin{frame}
+ Illust errors of regularized SPSD sketches 
+ argue that CD11 better in terms of norm reconstruction, but keep in mind
+ down stream apps, is more violent, so might make sense to look at WS01 alg
+\end{frame}
+
+\begin{frame} 
+ State result in CD11 for truncated W which applies only to Nystr\"om
+\end{frame}
+
+\begin{frame}
+ State theorem for WS01 algorithm, and about condition numbers
+ 
+ (what is a reasonable condition number for solving linear systems? this 
+ would motivate choice of regularization parameter, and say whether this
+ bound is useful)
+\end{frame}
+
+\begin{frame}
+ Combine with some particular SPSD sketch to get guarantees for the
+ regularized version
+\end{frame}
+% 
+% \section{Sparsification}
+% \begin{frame}{Randomized matrix sparsification}
+% Switch gears.
+%  Idea: Replace a dense matrix with a nearby sparse matrix, because the
+%  algorithms for sparse matrices are less resource intensive. Decreases
+%  arithmetic cost, not necessarily communication cost
+% 
+%  <Graphic here>
+%  
+%  Mention SVD times
+% \end{frame}
+% 
+% \begin{frame}
+%   \begin{displaybox}{0.7\linewidth}
+%  Question: Given $\matA \in \R^{m \times n}$ and $\epsilon > 0,$ how
+%  can we find a ``sparse'' matrix $\tilde{\matA}$ that satisfies $\|\matA - \tilde{\matA}\|_2 \leq \epsilon?$
+% \end{displaybox} 
+% 
+% \begin{itemize}
+%  \item (Achlioptas and McSherry) proposed 
+%  \item (Hazan and Kale) proposed
+%  \item (Zouzias and )
+%  \item (Liberty )
+%  \item (Nguyen et al)
+%  
+%  mention communication costs
+% \end{itemize}
+% 
+% \end{frame}
+% 
+% \begin{frame}
+%  Sparsification also has potential connections in graph theory because of connections
+%  between graphs and matrices
+%  
+%  infty->1 norm connection
+%  
+%  cite Mahoney paper
+% \end{frame}
+% 
+% \begin{frame}
+%  Sparsification connections to variable selection,
+%  infty->2 norm connection
+%  
+%  cite Tropp, etc.
+% \end{frame}
+% 
+% \begin{frame}
+%  Comment on fact that both infty->1 and infty->2 norms are NP-hard 
+% \end{frame}
+% 
+% \begin{frame}
+%  For all three norms: infty->1, infty->2, spectral, considering
+%   properties of random matrices with zero mean and independent entries
+%   
+%   Strategy: estimate the expected norms, use concentration result to
+%   show don't deviate much from expected norm
+% \end{frame}
+% 
+% \begin{frame}
+%  spectral norm argument, build on Latala's result (mention Seginer, etc.)
+% \end{frame}
+% 
+% \begin{frame}
+%  Infty->p norm lemma outline
+% \end{frame}
+% 
+% \begin{frame}
+%  Apply to infty->1 norm, mention optimality of bound
+% \end{frame}
+% 
+% \begin{frame}
+%  mention incomparability to latest matrix sparsification because best modeled
+%  as sum of random matrices, not elment wise
+%  
+%  motivates consideration of eigenvalue bounds
+% \end{frame}
+% 
+% 
+% \section{Eigenvalue Bounds}
+% \begin{frame}
+%  sums of random matrices come up, e.g. in sparsification, nonasymptotic statistics bounds
+%  
+%  pose main question: how do the eigenvalues of sums of hermitian random matrices behave?
+% \end{frame}
+% 
+% 
+% \begin{frame}
+%  what is known: extremal eigenvalue bounds, and asymptotic theory for ensembles
+%  difficulty of min-max formulation of all eigenvalues
+% \end{frame}
+% 
+% \begin{frame}
+%  we build on the matrix laplace transform methodology (introduce it and talk about
+%  classical tail bounds make it particularly useful)
+% \end{frame}
+% 
+% \begin{frame}
+%  extend mlt framework to extend to all eigenvalues
+%  state Courant--Fischer theorem
+% \end{frame}
+% 
+% \begin{frame}
+%  outline argument for extension
+% \end{frame}
+% 
+% \begin{frame}[Chernoff bounds]
+%  Give chernoff bounds
+% \end{frame}
+% 
+% \begin{frame}
+%  Application: subsampling columns from orthonormal rows
+%  mention coherence connection
+% \end{frame}
+% 
+% \begin{frame}
+%  figure of subsampling
+% \end{frame}
+% 
+% \begin{frame}[Bernstein bounds]
+%  Give Bernstein bounds
+% \end{frame}
+% 
+% \begin{frame}
+%  Give application: all eigenvalues of covariance matrix convergence rate
+%  Note this gives more info than sharpest known nonasymptotic result (b/c it deals with
+%  interior eigenvalue)
+% \end{frame}
+% 
+% \begin{frame}
+%  application: recall sparsification,
+%  here's a result on convergence of all eigenvalues of sparsified matrix
+% \end{frame}
+% 
+% 
+% \begin{frame}{Problem Statement}
+% 
+% Let $\mat{x} \in \R^p$ be a zero-mean high-dimensional random vector. Information on the dependence structure of $\mat{x}$ is captured by the covariance matrix
+% \[
+% \mat{\Sigma} = \E \mat{x} \mat{x}^\star.
+% \]
+% The sample covariance matrix is a classical estimator for $\mat{\Sigma}:$
+% \[
+% \widehat{\mat{\Sigma}}_n = \frac{1}{n} \sum\nolimits_{i=1}^n \mat{x}_i\mat{x}_i^\star.
+% \]
+% 
+% \begin{displaybox}{0.7\linewidth}
+% \parbox{\linewidth}{How many samples of $\mat{x}$ are required so that $\widehat{\mat{\Sigma}}_n$ accurately estimates $\mat{\Sigma}?$}
+% \end{displaybox}
+% 
+% \end{frame}
+% 
+% \begin{frame}{What is known}
+% 
+% Typically accuracy is measured in spectral norm.
+% \vspace{1em}
+% \begin{displaybox}{0.7\linewidth}
+% \parbox{\linewidth}{%
+% How many samples ensure that
+% \[ \|\mat{\Sigma} - \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2? \]
+% }
+% \end{displaybox}
+% \pause
+% \begin{itemize}
+%     \item for \textcolor{OliveGreen}{log-concave} distributions $\Omega(p)$ samples suffice (Adamczak et al. 2011), 
+% 		\pause
+%     \item for distributions with \textcolor{OliveGreen}{finite fourth moments}, $\tilde{\Omega}(p)$ samples suffice (Vershynin 2011a), 
+% 		\pause
+% 		\item for distributions with \textcolor{OliveGreen}{finite $2+\varepsilon$ moments} that satisfy a regularity condition, $\Omega(p)$ samples suffice (Vershynin 2011b),
+% 		\pause
+%     \item for distributions with \textcolor{OliveGreen}{finite second moments}, $\Omega(p\log p)$ samples suffice (Rudelson 1999). 
+% \end{itemize}
+% \end{frame}
+% 
+% \begin{frame}{An observation}
+% A relative spectral error bound,
+% \[
+% \|\mat{\Sigma} - \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2,
+% \]
+% ensures recovery of the top eigenpair of $\mat{\Sigma},$ \ldots
+% 
+% \vspace{1em}
+% \pause
+% but does \emph{not} ensure the recovery of the remaining eigenpairs:
+% \[
+% |\lambda_k(\mat{\Sigma}) - \lambda_k(\widehat{\mat{\Sigma}}_n)| < \varepsilon \|\mat{\Sigma}\|_2 
+% \]
+% is not meaningful if $\lambda_k \ll \lambda_1.$
+% 
+% \vspace{1em}
+% \pause
+% Using known relative spectral error bounds, need O$(\varepsilon^{-2} \kappa(\mat{\Sigma}_\ell)^2 p)$ measurements to get relative error recovery of the top $\ell$ eigenvalues.
+% \end{frame}
+% 
+% \begin{frame}{\dots and a question}
+% 
+% Maybe $\mat{\Sigma}$ has a decaying spectrum.
+% What if we want accurate estimates of a few of its eigenvalues?
+% \vspace{1em}
+% \begin{displaybox}{0.7\textwidth}
+% \parbox{\textwidth}{%
+% How many samples ensure the top $\ell \ll p$ eigenvalues are estimated to relative accuracy,
+% \[
+% |\lambda_k(\mat{\Sigma}) - \lambda_k(\widehat{\mat{\Sigma}}_n)| \leq \varepsilon \lambda_k(\mat{\Sigma})?
+% \]
+% }
+% \end{displaybox}
+% 
+% \vspace{1em}
+% Do we really need O($p$) measurements to recover just a few of the top eigenvalues?
+% 
+% \end{frame}
+% 
+% \begin{frame}{A simplified result}
+% 
+% \begin{thm}
+% Let the samples be drawn from a $\mathcal{N}(\mat{0}, \mat{\Sigma})$ distribution. Assume $\lambda_k$ decays sufficiently for $k > \ell$. If $\varepsilon \in (0, 1]$ and 
+% \[
+% n = \Omega(\varepsilon^{-2} \kappa(\mat{\Sigma}_\ell)^2 \ell \log p),
+% \]
+% then with high probability, for each $k=1,\ldots,\ell,$
+% \[
+% |\lambda_k(\widehat{\mat{\Sigma}}_n) - \lambda_k(\mat{\Sigma})| \leq \varepsilon \lambda_k(\mat{\Sigma}) 
+% \]
+% \end{thm}
+% 
+% \begin{itemize}
+% \pause
+% 	\item Sufficient decay is, (other conditions give other results)
+% 	\[ \sum_{i > \ell} \lambda_i/\lambda_1 \leq C.
+% 	\] 
+% 	This is satisfied if, e.g., the tail eigenvalues, $k > \ell,$ correspond to spread-spectrum noise or decay like $\tfrac{1}{i^{(1+\iota)}
+% 	}$ for some $\iota > 0.$
+% 	\pause
+% 	\item The approach generalizes to other subgaussian distributions.
+% \end{itemize}
+% 
+% \end{frame}
+% 
+% \begin{frame}{More generally}
+% Restrict, for each $k$, probability that $\hat{\lambda}_k$ under/overestimates $\lambda_k.$
+% \begin{itemize}
+% \pause 
+% \item an upper bound on $\lambda_k$ 
+% \[
+% n = \frac{8}{3 \varepsilon^2} \tikz[baseline] \node[anchor=base,rounded corners,fill=OliveGreen!30] {$\kappa(\mat{\Sigma}_k) \frac{\tr{\mat{\Sigma}_k}}{\lambda_k}(\log k + \beta \log p)$}; \Rightarrow \Prob{\frac{\hat{\lambda}_k}{1-\epsilon} > \lambda_k} > 1- p^{-\beta}
+% \]
+% 
+% \pause
+% 	\item a lower bound on $\lambda_k$
+% \begin{multline*}
+% n = \frac{1}{32\varepsilon^2} 
+% \tikz[baseline] \node[anchor=base,rounded corners,fill=BurntOrange!30] {$\frac{\big(\sum\nolimits_{i \geq k}\lambda_i \big)}{\lambda_k} \textstyle (\log (p-k+1) + \beta \log p)$}; \\
+% \Rightarrow \Prob{\frac{\hat{\lambda}_k}{1+\varepsilon} < \lambda_k} > 1-p^{-\beta}.
+% \end{multline*}
+% 
+% \pause 
+% 
+% \item Assuming decay
+% \begin{center}
+% 	\begin{tabular}{l >{\columncolor{OliveGreen!30}}c >{\columncolor{BurntOrange!30}}c}
+% 	\multicolumn{1}{l}{} & \multicolumn{1}{l}{upper bound} & \multicolumn{1}{l}{lower bound} \\ 
+% 		$\lambda_1$ & O$(\log p)$ & O$(\ell \log p)$ \\
+% 		$\lambda_\ell$ & O$(\kappa^2(\mat{\Sigma}_\ell) \ell \log p)$ & O$(\kappa(\mat{\Sigma}_\ell) \log p)$ 
+% 	\end{tabular}
+% \end{center}
+% 
+% %\pause
+% 	%\item a lower bound on $\lambda_k$
+% %
+% %\[
+% 	%n = \frac{8}{3\varepsilon^2} 
+% 	%\begin{tikzpicture}[baseline]
+% 	%\node[anchor=base] (n2) 
+% 	%{$\kappa(\mat{\Sigma}) \frac{\tr{\mat{\Sigma}}}{\lambda_p} (\log p + \delta)$}; 
+% 		%
+% %\begin{pgfonlayer}{background}
+% %\node[fill=BurntOrange!40,draw=BurntOrange,fit=(n2)] {};
+% %\end{pgfonlayer}
+% %\end{tikzpicture}
+% 	%\Rightarrow \Prob{\hat{\lambda}_p \leq (1-\varepsilon)\lambda_p} \leq \e^{-\delta}.
+% %\]
+% 	%\begin{itemize}
+% 	 %\item boo
+% 	%\end{itemize}
+% 	%
+% \end{itemize}
+% 
+% %\pause 
+% %If the spectrum decays:
+% %\begin{itemize}
+%  %\item Can be as small as $\log^2 p$  \tikz[na] \node[coordinate] (l1) {};
+% %\begin{tikzpicture}[overlay]
+%  %\path[->,OliveGreen,thick] (l1) edge [out=90, in=-90] (n1);
+% %\end{tikzpicture}
+% %
+% %\pause
+% %
+%  %\item Can be as small as $\kappa(\mat{\Sigma})^2 \log^2 p$  \tikz[na] \node[coordinate] (l2) {};
+% %\begin{tikzpicture}[overlay]
+%  %\path[->,BurntOrange,thick] (l2) edge [out=0, in=-90] (n2);
+% %\end{tikzpicture}
+% %\end{itemize}
+% %
+% \end{frame}
+% 
+% \begin{frame}{Proof sketch}
+% 
+% It suffices to show
+% \[
+%  \textstyle \Prob{\hat{\lambda}_k \geq (1+\varepsilon) \lambda_k } \quad \text{ and } \quad \Prob{\hat{\lambda}_k \leq (1-\varepsilon) \lambda_k}
+% \]
+% decay like $\mathrm{C} \exp(-\mathrm{c} n \epsilon^2)$ when $\epsilon$ is sufficiently small.
+% 
+% \pause
+% \begin{enumerate}
+% 		
+% 	\item Reduce the probability of each case occuring to the probability that the norm of an appropriate matrix is large.
+% 
+% 	\pause
+% 	
+% 	\item Use matrix Bernstein bounds to establish the correct decay of these norms. 
+% 
+% 	\pause
+% 	
+% 	\item Take a union bound over the indices $k.$ 
+%  \end{enumerate}
+%  
+% \end{frame}
+% 
+% % \begin{frame}{Reduction for $\hat{\lambda}_k \geq \lambda_k + t$}
+% % 
+% % Let $\mat{B}$ have orthonormal columns and span the bottom $(p-k+1)$-dimensional invariant subspace of $\mat{\Sigma}.$
+% % 
+% % \underline{Claim}
+% % \[
+% % \Prob{
+% % \begin{tikzpicture}[baseline]
+% % \node[anchor=base] (esteigenval) {$\hat{\lambda}_k$};
+% % %\onslide<3->{\begin{pgfonlayer}{background}
+% % %\node[fill=OliveGreen!40,draw=OliveGreen,fit=(esteigenval)] {};
+% % %\end{pgfonlayer}}
+% % \end{tikzpicture}
+% % \geq 
+% % \tikz[baseline]{\node[anchor=base] (eigenval) {$\lambda_k$};} + t 
+% % } \leq
+% % \Prob{
+% % \tikz[baseline]{\node[anchor=base] (pinchedesteigenval) {$\lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B})$}; }
+% % \geq  
+% % \tikz[baseline]{\node[anchor=base] (eigenvalexpansion) {$\lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B})$};} + t }.
+% % \]
+% % 
+% % \pause
+% % \emph{Proof.}
+% % 
+% % By Courant--Fischer,
+% % \[
+% %  \lambda_k(\mat{\Sigma}) = \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B})
+% % \]
+% % 
+% % \pause
+% % and
+% % \[
+% % \lambda_k(\widehat{\mat{\Sigma}}_n) = \min_{\substack{ \mat{V} \in \C^{p \times (p-k+1)} \\ \mat{V}^\star\mat{V}=\mat{I}}} \lambda_1(\mat{V}^\star \widehat{\mat{\Sigma}}_n\mat{V}) \leq \lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}).
+% % \]
+% % 
+% % \qed
+% % \end{frame}
+% 
+% \begin{frame}{Using the reduction}
+% Need to control RHS of 
+% \[
+% \Prob{\hat{\lambda}_k \geq \lambda_k + t }
+% \leq
+% \Prob{
+% \lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}) \geq  
+% \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + t 
+% }
+% \]
+% \pause
+% Note:
+% \begin{itemize}
+% 	\item 
+% $\lambda_1(\mat{B}^\star \hat{\mat{\Sigma}}_n \mat{B}) \rightarrow \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}),$ and
+% 	\item $\mat{B}^\star \hat{\mat{\Sigma}}_n \mat{B} = \sum\nolimits_i \mat{B}^\star \mat{x}_i\mat{x}_i^\star \mat{B}$ is a sum of independent random matrices.
+% \end{itemize}
+% \pause
+% Use estimates of the matrix moments of the summands to quantify the convergence. 
+% \begin{itemize}
+% \pause
+% \item If $\mat{g} \sim \mathcal{N}(\mat{0}, \mat{C})$, then for $m \geq 2,$
+% \[
+% \E(\mat{g}\mat{g}^\star)^m \preceq 2^m m!\,(\tr{\mat{C}})^{m-1} \cdot \mat{C}.
+% \]
+% \item Other subgaussian distributions satisfy similar relations. Can also substitute bounds on matrix moment generating functions, 
+% \[
+% \E \exp\left(\theta \mat{y}\mat{y}^\star \right) \preceq \mat{U}(\theta).
+% \]
+% \end{itemize}
+% 
+% \end{frame}
+% 
+% %\begin{frame}{Bernstein inequality}
+%  %Consider the probability
+% %\begin{multline*}
+%  %\Prob{\lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}) \geq  \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + t } \\
+%  %= \Prob{\lambda_1\left(\sum_{i=1}^n \mat{B}^\star \mat{x}_i \mat{x}_i^\star \mat{B} \right) \geq n \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + n t}.
+% %\end{multline*}
+% %
+% %The real variable analogue,
+% %\[
+%  %\Prob{ \sum_{i=1}^n x_i \geq t },
+% %\]
+% %can be bounded, using Bernstein's inequality, in terms of the variances of the summands and a uniform bound on their magnitudes.
+% %\end{frame}
+% 
+% \begin{frame}{Matrix Bernstein inequality }
+%  We use a moment-based matrix analog of Bernstein's inequality.
+% 
+% \begin{thm}[Matrix Moment-Bernstein Inequality]
+% Suppose self-adjoint matrices $\{\mat{G}_i\}$ have dimension $d$ and 
+% \[ \E(\mat{G}_i^m) \preceq \frac{m!}{2} A^{m-2} \cdot \mat{C}_i^2 \quad \text{ for } m =2,3,4,\ldots.
+% \]
+% Set
+% \[ \mu = \lambda_1\Big( \sum\nolimits_i \E\mat{G}_i \Big) \quad \text{and} \quad \sigma^2 = \lambda_1\Big(\sum\nolimits_i \mat{C}_i^2 \Big). \]
+% Then, for any $t \geq 0,$
+% \[	
+%  \Prob{ \lambda_1\Big(\sum\nolimits_i \mat{G}_i\Big) \geq \mu + t } \leq d \cdot \exp\Big(- \frac{t^2/2}{\sigma^2 + At} \Big).
+% \]
+% \end{thm}
+% 
+% \end{frame}
+% 
+% \begin{frame}{Finishing the argument}
+%  After computing $A$ and $\mat{C}_i^2$ for the summands $\mat{B}^\star \mat{x}_i \mat{x}_i^\star \mat{B},$ this gives
+% \[
+%  \Prob{\hat{\lambda}_k \geq \lambda_k +t} \leq (p-k+1)\cdot \exp\left( \frac{-nt^2}{32\lambda_k \sum_{i \geq k} \lambda_i } \right) \quad \text{ for } t \leq 4n \lambda_k.
+% \]
+% Finally, take $t = \varepsilon \lambda_k$ to see
+% \[
+%  \Prob{\hat{\lambda}_k \geq (1+\varepsilon) \lambda_k} \leq (p-k+1)\cdot \exp\left( \frac{-n\varepsilon^2}{32\sum_{i \geq k} \frac{\lambda_i}{\lambda_k} } \right) \quad \text{ for } \varepsilon \leq 4n.
+% \]
+% The proof for the case $\hat{\lambda}_k \leq \lambda_k - t$ is similar.
+% \qed
+% \end{frame}
+% 
+% \begin{frame}{Details}
+% ``{\it Tail Bounds for All Eigenvalues of A Sum of Random Matrices}'', Gittens and Tropp, 2011. Preprint, \href{http://arxiv.org/abs/1104.4513}{arXiv:1104.4513}.
+% \begin{itemize}
+% \item Elaboration on the relative error estimation results.
+% \item Similar arguments to find tail bounds for all eigenvalues of a sum of \emph{arbitrary} random matrices.
+% \item An application to column subsampling.
+% \end{itemize}
+% 
+% \end{frame}
+\end{document}
+

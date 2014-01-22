@@ -1,0 +1,7 @@
+It is hard! to find rrqr codes that work in MATLAB (at least 64-bit Linux)
+Everything I've tried failed, but I'm not at expert at programming
+I obtained this mex file from 
+http://www.mpi-magdeburg.mpg.de/mpcsc/mitarbeiter/saak/Software/rrqr.php?lang=en
+See there for mexs for other architectures, or if you're feeling adventurous
+or can't find one that suits your need, you can try
+http://www.mathworks.com/matlabcentral/fileexchange/18591

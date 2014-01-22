@@ -1,0 +1,72 @@
+\select@language {english}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Spectrum of a random submatrix of a unitary DFT matrix.}}{24}{figure.2.1}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Residual errors of low-rank approximation algorithms}}{84}{figure.5.1}
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Forward errors of low-rank approximation algorithms}}{86}{figure.5.2}
+\contentsline {figure}{\numberline {5.3}{\ignorespaces The number of column samples required for relative error Frobenius-norm approximations}}{87}{figure.5.3}
+\contentsline {figure}{\numberline {5.4}{\ignorespaces Empirical versus predicted spectral-norm residual errors of low-rank approximations}}{88}{figure.5.4}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {6.1}{\ignorespaces Empirical demonstration of the optimality of Theorem~\ref {ch4:thm:uniformnystromerror}.}}{117}{figure.6.1}
+\contentsline {figure}{\numberline {6.2}{\ignorespaces Spectral-norm errors of regularized Nystr\"om extensions as coherence varies}}{118}{figure.6.2}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Relative spectral-norm errors of Algorithm~\ref {ch4:alg:simple-stable-nystrom}}}}{118}{figure.6.2}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Relative spectral-norm errors of Algorithm~\ref {ch4:alg:CD11}}}}{118}{figure.6.2}
+\contentsline {figure}{\numberline {6.3}{\ignorespaces Spectral-norm error of regularized Nystr\"om extensions as regularization parameter varies}}{119}{figure.6.3}
+\contentsline {figure}{\numberline {6.4}{\ignorespaces Relative errors of non-rank-restricted SPSD sketches of the GR and HEP Laplacian matrices}}{124}{figure.6.4}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {GR, $k = 20$}}}{124}{figure.6.4}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {GR, $k = 60$}}}{124}{figure.6.4}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {HEP, $k = 20$}}}{124}{figure.6.4}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {HEP, $k = 60$}}}{124}{figure.6.4}
+\contentsline {figure}{\numberline {6.5}{\ignorespaces Relative errors of non-rank-restricted SPSD sketches of the Enron and Gnutella Laplacian matrices}}{125}{figure.6.5}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Enron, $k = 20$}}}{125}{figure.6.5}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Enron, $k = 60$}}}{125}{figure.6.5}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Gnutella, $k = 20$}}}{125}{figure.6.5}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Gnutella, $k = 60$}}}{125}{figure.6.5}
+\contentsline {figure}{\numberline {6.6}{\ignorespaces Relative errors of rank-restricted SPSD sketches of the GR and HEP Laplacian matrices}}{126}{figure.6.6}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {GR, $k = 20$}}}{126}{figure.6.6}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {GR, $k = 60$}}}{126}{figure.6.6}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {HEP, $k = 20$}}}{126}{figure.6.6}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {HEP, $k = 60$}}}{126}{figure.6.6}
+\contentsline {figure}{\numberline {6.7}{\ignorespaces Relative errors of rank-restricted SPSD sketches of the Enron and Gnutella Laplacian matrices}}{127}{figure.6.7}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Enron, $k = 20$}}}{127}{figure.6.7}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Enron, $k = 60$}}}{127}{figure.6.7}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Gnutella, $k = 20$}}}{127}{figure.6.7}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Gnutella, $k = 60$}}}{127}{figure.6.7}
+\contentsline {figure}{\numberline {6.8}{\ignorespaces Relative errors of non-rank-restricted SPSD sketches of the linear kernel matrices}}{131}{figure.6.8}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Dexter, $k = 8$}}}{131}{figure.6.8}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Protein, $k = 10$}}}{131}{figure.6.8}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {SNPs, $k = 5$}}}{131}{figure.6.8}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Gisette, $k = 12$}}}{131}{figure.6.8}
+\contentsline {figure}{\numberline {6.9}{\ignorespaces Relative errors of rank-restricted SPSD sketches of the linear kernel matrices}}{132}{figure.6.9}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Dexter, $k = 8$}}}{132}{figure.6.9}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Protein, $k = 10$}}}{132}{figure.6.9}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {SNPs, $k = 5$}}}{132}{figure.6.9}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Gisette, $k = 12$}}}{132}{figure.6.9}
+\contentsline {figure}{\numberline {6.10}{\ignorespaces Relative errors of non-rank-restricted SPSD sketches of the dense RBFK matrices}}{133}{figure.6.10}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {AbaloneD, $\sigma = .15, k = 20$}}}{133}{figure.6.10}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {AbaloneD, $\sigma = 1, k = 20$}}}{133}{figure.6.10}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {WineD, $\sigma = 1, k = 20$}}}{133}{figure.6.10}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {WineD, $\sigma = 2.1, k = 20$}}}{133}{figure.6.10}
+\contentsline {figure}{\numberline {6.11}{\ignorespaces Relative errors of rank-restricted SPSD sketches of the dense RBFK matrices}}{134}{figure.6.11}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {AbaloneD, $\sigma = .15, k = 20$}}}{134}{figure.6.11}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {AbaloneD, $\sigma = 1, k = 20$}}}{134}{figure.6.11}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {WineD, $\sigma = 1, k = 20$}}}{134}{figure.6.11}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {WineD, $\sigma = 2.1, k = 20$}}}{134}{figure.6.11}
+\contentsline {figure}{\numberline {6.12}{\ignorespaces Relative errors of non-rank-restricted SPSD sketches of the sparse RBFK matrices}}{135}{figure.6.12}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {AbaloneS, $\sigma = .15, k = 20$}}}{135}{figure.6.12}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {AbaloneS, $\sigma = 1, k = 20$}}}{135}{figure.6.12}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {WineS, $\sigma = 1, k = 20$}}}{135}{figure.6.12}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {WineS, $\sigma = 2.1, k = 20$}}}{135}{figure.6.12}
+\contentsline {figure}{\numberline {6.13}{\ignorespaces Relative errors of rank-restricted SPSD sketches of the sparse RBFK matrices}}{136}{figure.6.13}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {AbaloneS, $\sigma = .15, k = 20$}}}{136}{figure.6.13}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {AbaloneS, $\sigma = 1, k = 20$}}}{136}{figure.6.13}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {WineS, $\sigma = 1, k = 20$}}}{136}{figure.6.13}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {WineS, $\sigma = 2.1, k = 20$}}}{136}{figure.6.13}
+\contentsline {figure}{\numberline {6.14}{\ignorespaces Comparison of projection-based low-rank approximations with one-pass SPSD sketches}}{140}{figure.6.14}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Gnutella, $k=20$}}}{140}{figure.6.14}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Dexter, $k=8$}}}{140}{figure.6.14}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {AbaloneD, $\sigma = .15, k = 20$}}}{140}{figure.6.14}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {WineS, $\sigma =1, k=20$}}}{140}{figure.6.14}

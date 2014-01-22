@@ -1,0 +1,72 @@
+\usepackage{amsmath,amsthm,amssymb,bm}
+\usepackage{multirow}
+\usepackage{colonequals}
+\usepackage{enumerate}
+
+\renewcommand{\star}{*}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\def\pinv{\dagger}
+\def\transp{T}
+
+\newcommand{\mat}[1]{\ensuremath{\mathbf{#1}}}
+\renewcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\e}{\ensuremath{\mathrm{e}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\Prob}[1]{\ensuremath{\mathbb{P}\left\{#1\right\}}}
+\newcommand{\CondProb}[2]{\ensuremath{\mathbb{P}\left\{#1 \,\left|\, #2 \right.\right\}}}
+\newcommand{\lnorm}[2]{\ensuremath{\left\| #2 \right\|_{L_{#1}}}}
+\newcommand{\lipnorm}[1]{\ensuremath{\left\| #1 \right\|_\Pi}}
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\C}{\ensuremath{\mathbb{C}}}
+\newcommand{\randcon}{\ensuremath{\mathrm{R}}}
+\newcommand{\indicator}[1]{\ensuremath{\mathbb{1}\left\{#1\right\}}}
+
+\newcommand{\norm}[1]{\ensuremath{\big\|#1\big\|}}
+\newcommand{\xinorm}[1]{\ensuremath{\big\|#1\big\|_\xi}}
+\newcommand{\xinorms}[1]{\ensuremath{\big\|#1\big\|_\xi^2}}
+\newcommand{\snorm}[1]{\ensuremath{\big\|#1\big\|_2}}
+\newcommand{\snorms}[1]{\ensuremath{\big\|#1\big\|_2^2}}
+\newcommand{\fnorm}[1]{\ensuremath{\big\|#1\big\|_{\mathrm{F}}}}
+\newcommand{\fnorms}[1]{\ensuremath{\big\|#1\big\|_{\mathrm{F}}^2}}
+\newcommand{\mcnorm}[1]{\ensuremath{\big\|#1\big\|_{\mathrm{mc}}}}
+\newcommand{\mcnorms}[1]{\ensuremath{\big\|#1\big\|_{\mathrm{mc}}^2}}
+\newcommand{\supoverqball}{\ensuremath{\max_{\qnorm{\mat{u}} = 1}}}
+
+\newcommand{\pnorm}[1]{\ensuremath{\left\|#1\right\|_p}}
+\newcommand{\qnorm}[1]{\ensuremath{\left\|#1\right\|_q}}
+\newcommand{\infnorm}[1]{\ensuremath{\left\|#1\right\|_\infty}}
+\newcommand{\infonorm}[1]{\ensuremath{\left\|#1\right\|_{\infty\rightarrow 1}}}
+\newcommand{\inftnorm}[1]{\ensuremath{\left\|#1\right\|_{\infty\rightarrow 2}}}
+\newcommand{\onetwonorm}[1]{\ensuremath{\left\|#1\right\|_{1 \rightarrow 2}}}
+\newcommand{\twoinfnorm}[1]{\ensuremath{\left\|#1\right\|_{2 \rightarrow \infty}}}
+\newcommand{\infone}{\ensuremath{\infty\!\rightarrow\!\!1}}
+\newcommand{\inftwo}{\ensuremath{\infty\!\rightarrow\!\!2}}
+\newcommand{\infp}{\ensuremath{\infty\!\rightarrow\!p}}
+\newcommand{\twoinf}{\ensuremath{2\!\!\rightarrow\!\!\infty}}
+\newcommand{\colnorm}[1]{\ensuremath{\left\|#1\right\|_{\text{\rm col}}}}
+\newcommand{\rownorm}[1]{\ensuremath{\left\|#1\right\|_{\text{\rm row}}}}
+\newcommand{\cutnorm}[1]{\ensuremath{\left\|#1\right\|_{\text{\rm C}}}}
+
+\newcommand{\F}{F}
+\newcommand{\lambdamax}[1]{\ensuremath{\lambda_{\mathrm{max}}\left(#1\right)}}
+\newcommand{\lambdamin}[1]{\ensuremath{\lambda_{\mathrm{min}}\left(#1\right)}}
+\newcommand{\sigmamin}[1]{\ensuremath{\sigma_{\mathrm{min}}\left(#1\right)}}
+\newcommand{\sigmamax}[1]{\ensuremath{\sigma_{\mathrm{max}}\left(#1\right)}}
+\newcommand{\Isom}[2]{\ensuremath{V_{#1}(\C^{#2})}}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\trace}{trace}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\var}{Var}
+\newcommand{\trexp}[1]{\ensuremath{\tr\exp\left(#1\right)}}
+\newcommand{\const}[1]{\ensuremath{\mathrm{#1}}}
+
+
+\newtheorem{thm}{Theorem}
+\newtheorem{prop}{Proposition}
+%\newtheorem{lemma}{Lemma}
+\newtheorem{cor}{Corollary}
+\newtheorem{defn}{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
